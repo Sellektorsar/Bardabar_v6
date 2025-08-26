@@ -1,0 +1,13 @@
+# Build output
+node_modules/
+dist/
+playwright-report/
+test-results/
+test-screenshots/
+
+# Env
+.env
+.env.*
+
+# Other
+.DS_Store
