@@ -671,6 +671,7 @@ export default function App() {
               <Button
                 variant="outline"
                 size="sm"
+                data-testid="btn-open-admin"
                 onClick={() => handleNavClick("admin")}
                 className="border-orange-300 text-orange-600 hover:bg-orange-50"
               >

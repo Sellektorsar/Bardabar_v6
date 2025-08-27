@@ -28,10 +28,16 @@ test.describe("Booking Tables Tab E2E Tests", () => {
     await page.goto("http://localhost:5173");
     await page.waitForLoadState("networkidle");
 
-    // Клик по кнопке "Админ" в хедере
-    const adminButton = page.getByRole("button", { name: "Админ" });
-    await expect(adminButton).toBeVisible();
-    await adminButton.click();
+    // Клик по кнопке "Админ" в хедере (устойчивый селектор)
+    let adminButton = page.getByTestId("btn-open-admin");
+     if (!(await adminButton.isVisible())) {
+       // Фолбэк: мобильная версия — явный селектор testid
+       const menuToggle = page.getByRole("button").filter({ has: page.locator("svg.h-4.w-4") }).nth(1);
+       await menuToggle.click();
+       adminButton = page.getByTestId("btn-open-admin-mobile");
+     }
+     await expect(adminButton).toBeVisible();
+     await adminButton.click();
 
     // Ожидание загрузки админ-панели
     await page.waitForSelector("text=Админ-панель");
