@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# SPA: сервер должен отдавать index.html по умолчанию
 Sitemap: https://bardabarv6-production.up.railway.app/sitemap.xml
