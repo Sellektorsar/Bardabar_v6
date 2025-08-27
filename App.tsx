@@ -711,6 +711,7 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
+                  data-testid={item.id === "admin" ? "btn-open-admin-mobile" : undefined}
                   className={`rounded-lg px-4 py-3 text-left transition-all duration-300 ${
                     activeSection === item.id
                       ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30"
@@ -1600,7 +1601,7 @@ export default function App() {
       </div>
 
       <Tabs value={adminTab} onValueChange={setAdminTab} className="w-full">
-        <TabsList className="mb-8 grid w-full grid-cols-7">
+        <TabsList className="relative z-10 mb-8 grid w-full grid-cols-7">
           <TabsTrigger value="staff" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Персонал

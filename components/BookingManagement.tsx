@@ -20,6 +20,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 interface Booking {
   id: string;
@@ -359,53 +360,46 @@ export function BookingManagement() {
           {/* Панель фильтров по статусам для столиков */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-muted-foreground">Статус:</span>
-            <Button
+            <ToggleGroup
+              type="single"
+              value={statusFilterTables}
+              onValueChange={(value) => {
+                if (value) setStatusFilterTables(value as typeof statusFilterTables);
+              }}
               size="sm"
-              variant={statusFilterTables === "all" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("all")}
-              data-testid="tables-status-all"
+              variant="outline"
+              aria-label="Фильтр статуса столиков"
             >
-              Все (<span data-testid="tables-status-all-count">{tableReservationsAll.length}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "pending" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("pending")}
-              data-testid="tables-status-pending"
-            >
-              Ожидает (
-              <span data-testid="tables-status-pending-count">{tableStatusCounts.pending}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "confirmed" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("confirmed")}
-              data-testid="tables-status-confirmed"
-            >
-              Подтверждено (
-              <span data-testid="tables-status-confirmed-count">{tableStatusCounts.confirmed}</span>
-              )
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "completed" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("completed")}
-              data-testid="tables-status-completed"
-            >
-              Завершено (
-              <span data-testid="tables-status-completed-count">{tableStatusCounts.completed}</span>
-              )
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "cancelled" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("cancelled")}
-              data-testid="tables-status-cancelled"
-            >
-              Отменено (
-              <span data-testid="tables-status-cancelled-count">{tableStatusCounts.cancelled}</span>
-              )
-            </Button>
+              <ToggleGroupItem value="all" data-testid="tables-status-all">
+                Все (
+                <span data-testid="tables-status-all-count">{tableReservationsAll.length}</span>)
+              </ToggleGroupItem>
+              <ToggleGroupItem value="pending" data-testid="tables-status-pending">
+                Ожидает (
+                <span data-testid="tables-status-pending-count">{tableStatusCounts.pending}</span>)
+              </ToggleGroupItem>
+              <ToggleGroupItem value="confirmed" data-testid="tables-status-confirmed">
+                Подтверждено (
+                <span data-testid="tables-status-confirmed-count">
+                  {tableStatusCounts.confirmed}
+                </span>
+                )
+              </ToggleGroupItem>
+              <ToggleGroupItem value="completed" data-testid="tables-status-completed">
+                Завершено (
+                <span data-testid="tables-status-completed-count">
+                  {tableStatusCounts.completed}
+                </span>
+                )
+              </ToggleGroupItem>
+              <ToggleGroupItem value="cancelled" data-testid="tables-status-cancelled">
+                Отменено (
+                <span data-testid="tables-status-cancelled-count">
+                  {tableStatusCounts.cancelled}
+                </span>
+                )
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           {tableReservations.length === 0 ? (
