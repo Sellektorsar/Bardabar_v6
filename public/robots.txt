@@ -2,5 +2,4 @@ User-agent: *
 Allow: /
 
 # SPA: сервер должен отдавать index.html по умолчанию
-# Укажите абсолютный URL в директиве Sitemap после настройки домена
-Sitemap: /sitemap.xml
+Sitemap: https://bardabarv6-production.up.railway.app/sitemap.xml
