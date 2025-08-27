@@ -3,7 +3,6 @@
 import { Calendar, CheckCircle, Clock, CreditCard, Lock, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 
-
 import { projectId, publicAnonKey } from "../utils/supabase/info";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";

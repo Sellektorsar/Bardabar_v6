@@ -10,7 +10,7 @@ interface AboutProps {
   isAdminMode?: boolean;
 }
 
-export function About({ isAdminMode }: AboutProps) {
+export function About({ isAdminMode: _isAdminMode }: AboutProps) {
   const teamMembers = [
     {
       id: 1,

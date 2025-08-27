@@ -58,7 +58,11 @@ const saveDemoTableReservation = (payload: {
   }
 };
 
-export function TableReservation({ acceptsReservations = true }: { acceptsReservations?: boolean }) {
+export function TableReservation({
+  acceptsReservations = true,
+}: {
+  acceptsReservations?: boolean;
+}) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -107,7 +111,9 @@ export function TableReservation({ acceptsReservations = true }: { acceptsReserv
           <CardTitle className="text-center">Бронирование столика</CardTitle>
         </CardHeader>
         <CardContent className="p-8 text-center text-muted-foreground">
-          <p className="mb-2 text-lg font-medium text-foreground">Бронирования временно недоступны</p>
+          <p className="mb-2 text-lg font-medium text-foreground">
+            Бронирования временно недоступны
+          </p>
           <p>
             Администратор временно отключил приём заявок на бронирование столиков. Пожалуйста,
             зайдите позже или свяжитесь с нами по телефону.
@@ -184,7 +190,7 @@ export function TableReservation({ acceptsReservations = true }: { acceptsReserv
       let data: any = undefined;
       try {
         data = await response.json();
-      } catch (_) {
+      } catch {
         // Ответ не JSON — полагаемся на статус и текст
       }
 

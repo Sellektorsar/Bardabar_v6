@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cafe Bardabar</title>
-    <meta name="description" content="Cafe Bardabar — уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование столиков и билетов на события онлайн." />
+    <meta
+      name="description"
+      content="Cafe Bardabar — уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование столиков и билетов на события онлайн."
+    />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#111827" />
     <!-- Фоллбэк: во время билда используем относительные ссылки, абсолютный URL ставим в рантайме -->
@@ -15,7 +18,10 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Cafe Bardabar" />
-    <meta property="og:description" content="Уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование онлайн." />
+    <meta
+      property="og:description"
+      content="Уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование онлайн."
+    />
     <!-- Фоллбэк: абсолютный URL ставим в рантайме -->
     <meta property="og:url" content="/" />
     <meta property="og:image" content="/og-image.svg" />
@@ -23,16 +29,19 @@
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Cafe Bardabar" />
-    <meta name="twitter:description" content="Уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование онлайн." />
+    <meta
+      name="twitter:description"
+      content="Уютное кафе с живой музыкой, авторскими коктейлями и отличной кухней. Бронирование онлайн."
+    />
     <meta name="twitter:image" content="/og-image.svg" />
 
     <script type="module">
       // Безопасно выставляем canonical и og:url в рантайме из env или из текущего origin
       const SITE_URL = (import.meta.env && import.meta.env.VITE_SITE_URL) || window.location.origin;
       const canonical = document.querySelector('link[rel="canonical"]');
-      if (canonical) canonical.setAttribute('href', SITE_URL);
+      if (canonical) canonical.setAttribute("href", SITE_URL);
       const ogUrl = document.querySelector('meta[property="og:url"]');
-      if (ogUrl) ogUrl.setAttribute('content', SITE_URL);
+      if (ogUrl) ogUrl.setAttribute("content", SITE_URL);
     </script>
   </head>
   <body>

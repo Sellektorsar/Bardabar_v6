@@ -102,11 +102,7 @@ export default [
   },
   // Тесты (Playwright): Node-глобалы, отключаем no-unused-vars
   {
-    files: [
-      "tests/**/*.*",
-      "**/*.spec.*",
-      "**/*.test.*",
-    ],
+    files: ["tests/**/*.*", "**/*.spec.*", "**/*.test.*"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2021,
@@ -122,9 +118,7 @@ export default [
   },
   // Supabase Edge/Deno функции
   {
-    files: [
-      "supabase/functions/**/*.*",
-    ],
+    files: ["supabase/functions/**/*.*"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2021,

@@ -59,7 +59,9 @@ test.describe("Booking Tables Tab E2E Tests", () => {
 
     // Ожидание загрузки компонента BookingManagement
     await page.waitForSelector("text=Управление бронированиями");
-    await expect(page.getByRole("heading", { name: "Управление бронированиями", level: 3 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Управление бронированиями", level: 3 }),
+    ).toBeVisible();
 
     // Скриншот админ-панели с загруженным BookingManagement
     await takeScreenshot(page, "01-admin-booking-management-loaded");
@@ -123,7 +125,9 @@ test.describe("Booking Tables Tab E2E Tests", () => {
     const completedCount = parseInt((await completedCountEl.textContent()) || "0");
     const cancelledCount = parseInt((await cancelledCountEl.textContent()) || "0");
 
-    console.log(`📈 Счетчики: Все=${allCount}, Ожидает=${pendingCount}, Подтверждено=${confirmedCount}, Завершено=${completedCount}, Отменено=${cancelledCount}`);
+    console.log(
+      `📈 Счетчики: Все=${allCount}, Ожидает=${pendingCount}, Подтверждено=${confirmedCount}, Завершено=${completedCount}, Отменено=${cancelledCount}`,
+    );
 
     // Проверка математической корректности счетчиков
     const totalCount = pendingCount + confirmedCount + completedCount + cancelledCount;
@@ -191,14 +195,14 @@ test.describe("Booking Tables Tab E2E Tests", () => {
 
       await filterCompleted.click();
       await expect(filterCompleted).toHaveAttribute("data-state", "on");
- 
+
       const visibleBookings = page.locator("[data-testid^='table-booking-card-']");
-       const visibleCount = await visibleBookings.count();
- 
-       expect(visibleCount).toBe(completedCount);
- 
-       await takeScreenshot(page, "06-completed-filter-applied");
-       console.log("✅ Фильтр 'Завершено' работает корректно");
+      const visibleCount = await visibleBookings.count();
+
+      expect(visibleCount).toBe(completedCount);
+
+      await takeScreenshot(page, "06-completed-filter-applied");
+      console.log("✅ Фильтр 'Завершено' работает корректно");
     } else {
       console.log("⏭️ Пропускаем тест фильтра 'Завершено' - нет данных");
     }
@@ -209,14 +213,14 @@ test.describe("Booking Tables Tab E2E Tests", () => {
 
       await filterCancelled.click();
       await expect(filterCancelled).toHaveAttribute("data-state", "on");
- 
+
       const visibleBookings = page.locator("[data-testid^='table-booking-card-']");
-       const visibleCount = await visibleBookings.count();
- 
-       expect(visibleCount).toBe(cancelledCount);
- 
-       await takeScreenshot(page, "07-cancelled-filter-applied");
-       console.log("✅ Фильтр 'Отменено' работает корректно");
+      const visibleCount = await visibleBookings.count();
+
+      expect(visibleCount).toBe(cancelledCount);
+
+      await takeScreenshot(page, "07-cancelled-filter-applied");
+      console.log("✅ Фильтр 'Отменено' работает корректно");
     } else {
       console.log("⏭️ Пропускаем тест фильтра 'Отменено' - нет данных");
     }
@@ -231,7 +235,9 @@ test.describe("Booking Tables Tab E2E Tests", () => {
     const finalVisibleCount = await finalVisibleBookings.count();
 
     expect(finalVisibleCount).toBe(allCount);
-    console.log(`✅ Финальная проверка: отображается ${finalVisibleCount} из ${allCount} бронирований`);
+    console.log(
+      `✅ Финальная проверка: отображается ${finalVisibleCount} из ${allCount} бронирований`,
+    );
 
     await takeScreenshot(page, "08-all-filter-final-check");
 
