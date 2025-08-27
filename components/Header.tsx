@@ -78,6 +78,7 @@ export function Header({
             <Button
               variant="outline"
               size="sm"
+              data-testid="btn-open-admin"
               onClick={handleAdminClick}
               className="border-orange-300 text-orange-600 hover:bg-orange-50"
             >
@@ -121,6 +122,7 @@ export function Header({
 
                   <Button
                     variant="outline"
+                    data-testid="btn-open-admin-mobile"
                     onClick={handleAdminClick}
                     className="mt-4 w-full border-orange-300 text-orange-600 hover:bg-orange-50"
                   >

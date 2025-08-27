@@ -1,19 +1,15 @@
 "use client";
 
 import {
-  Award,
   Bell,
   Calendar,
   Camera,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Coffee,
   Edit,
   ExternalLink,
   Eye,
-  Filter,
-  Heart,
   Image as ImageIcon,
   Mail,
   MapPin,
@@ -26,10 +22,8 @@ import {
   Plus,
   Quote,
   Save,
-  Search,
   Send,
   Settings,
-  Smartphone,
   Sparkles,
   Star,
   Sun,
@@ -358,8 +352,7 @@ export default function App() {
     email: "info@bar-da-bar.ru",
     address: "г. Москва, ул. Центральная, 123",
     workingHours: "Пн-Чт: 09:00-23:00, Пт-Сб: 09:00-01:00, Вс: 10:00-22:00",
-    description:
-      "Уютное кафе в самом сердце города, где встречаются традиции и современность.",
+    description: "Уютное кафе в самом сердце города, где встречаются традиции и современность.",
     isOpen: true,
     acceptsReservations: true,
   };
@@ -436,7 +429,7 @@ export default function App() {
 
   const menuCategories = ["Горячие блюда", "Салаты", "Напитки", "Десерты"];
   const eventTypes = ["Музыка", "Мастер-класс", "Праздник", "Кулинария", "Мероприятие"];
-  const galleryCategories = ["interior", "food", "events", "team"];
+  const _galleryCategories = ["interior", "food", "events", "team"];
 
   const handleNavClick = (sectionId: string) => {
     setActiveSection(sectionId);
@@ -678,6 +671,7 @@ export default function App() {
               <Button
                 variant="outline"
                 size="sm"
+                data-testid="btn-open-admin"
                 onClick={() => handleNavClick("admin")}
                 className="border-orange-300 text-orange-600 hover:bg-orange-50"
               >
@@ -717,6 +711,7 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
+                  data-testid={item.id === "admin" ? "btn-open-admin-mobile" : undefined}
                   className={`rounded-lg px-4 py-3 text-left transition-all duration-300 ${
                     activeSection === item.id
                       ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30"
@@ -1288,7 +1283,7 @@ export default function App() {
     );
   };
 
-  const renderEvents = () => (
+  const _renderEvents = () => (
     <section className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
         <h2 className="mb-4 text-4xl font-bold text-foreground">Мероприятия</h2>
@@ -1606,7 +1601,7 @@ export default function App() {
       </div>
 
       <Tabs value={adminTab} onValueChange={setAdminTab} className="w-full">
-        <TabsList className="mb-8 grid w-full grid-cols-7">
+        <TabsList className="relative z-10 mb-8 grid w-full grid-cols-7">
           <TabsTrigger value="staff" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Персонал

@@ -3,7 +3,6 @@
 import {
   AlertTriangle,
   Calendar,
-  Clock,
   CreditCard,
   Loader2,
   Mail,
@@ -11,6 +10,7 @@ import {
   RefreshCw,
   Users,
 } from "lucide-react";
+import * as React from "react";
 import { useEffect, useState } from "react";
 
 import { projectId, publicAnonKey } from "../utils/supabase/info";
@@ -20,6 +20,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 interface Booking {
   id: string;
@@ -40,6 +41,47 @@ interface Booking {
   paymentMethod?: string;
 }
 
+// Демо-данные и локальный ридер вынесены на модульный уровень для стабильных ссылок
+const DEMO_BOOKINGS: Booking[] = [
+  {
+    id: "demo-table-1",
+    name: "Иван Петров",
+    phone: "+7 900 123-45-67",
+    email: "ivan@example.com",
+    status: "pending",
+    type: "table",
+    createdAt: new Date().toISOString(),
+    date: new Date().toLocaleDateString("ru-RU"),
+    time: "19:00",
+    guests: 4,
+    specialRequests: "Окно, детский стул",
+  },
+  {
+    id: "demo-event-1",
+    name: "Мария Смирнова",
+    phone: "+7 911 555-22-11",
+    email: "maria@example.com",
+    status: "confirmed",
+    type: "event",
+    createdAt: new Date().toISOString(),
+    eventTitle: "Джазовый вечер",
+    tickets: 2,
+    totalAmount: 3000,
+    paymentStatus: "paid",
+    paymentMethod: "card",
+  },
+];
+
+const readDemoBookings = (): Booking[] => {
+  try {
+    const raw = localStorage.getItem("demo_bookings");
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+};
+
 export function BookingManagement() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,66 +97,24 @@ export function BookingManagement() {
     "all" | "paid" | "pending" | "requires_payment"
   >("all");
 
-  // Демо-данные для режима приостановки проекта
-  const demoBookings: Booking[] = [
-    {
-      id: "demo-table-1",
-      name: "Иван Петров",
-      phone: "+7 900 123-45-67",
-      email: "ivan@example.com",
-      status: "pending",
-      type: "table",
-      createdAt: new Date().toISOString(),
-      date: new Date().toLocaleDateString("ru-RU"),
-      time: "19:00",
-      guests: 4,
-      specialRequests: "Окно, детский стул",
-    },
-    {
-      id: "demo-event-1",
-      name: "Мария Смирнова",
-      phone: "+7 911 555-22-11",
-      email: "maria@example.com",
-      status: "confirmed",
-      type: "event",
-      createdAt: new Date().toISOString(),
-      eventTitle: "Джазовый вечер",
-      tickets: 2,
-      totalAmount: 3000,
-      paymentStatus: "paid",
-      paymentMethod: "card",
-    },
-  ];
-
-  // Локальные демо-бронирования (сохраненные из форм при паузе/ошибках)
-  const readDemoBookings = (): Booking[] => {
-    try {
-      const raw = localStorage.getItem("demo_bookings");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  };
+  // Демо-данные и ридер вынесены на уровень модуля выше
 
   const updateDemoBookingStatus = (bookingId: string, newStatus: string) => {
     try {
       const arr = readDemoBookings();
       const updated = arr.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b));
       localStorage.setItem("demo_bookings", JSON.stringify(updated));
-    } catch {}
+    } catch (e) {
+      console.error("Не удалось обновить локальные демо-бронирования:", e);
+    }
   };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  const fetchBookings = async () => {
+  const fetchBookings = React.useCallback(async () => {
     try {
       // Возможность принудительно включить демо-режим через env для локальной разработки
       if (import.meta.env?.VITE_BOOKINGS_DEMO === "1") {
         setIsProjectPaused(true);
-        setBookings([...readDemoBookings(), ...demoBookings]);
+        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
         return;
       }
 
@@ -130,7 +130,7 @@ export function BookingManagement() {
       // Фолбэк при статусе 540 (Project Paused)
       if (response.status === 540) {
         setIsProjectPaused(true);
-        setBookings([...readDemoBookings(), ...demoBookings]);
+        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
         return;
       }
 
@@ -142,16 +142,20 @@ export function BookingManagement() {
 
       // Любой не-OK ответ (например, 4xx/5xx без 540) — уходим в демо-режим
       setIsProjectPaused(true);
-      setBookings(demoBookings);
+      setBookings(DEMO_BOOKINGS);
     } catch (error) {
       console.error("Ошибка при получении бронирований:", error);
       // Сетевые/CORS ошибки: включаем демо-режим
       setIsProjectPaused(true);
-      setBookings(demoBookings);
+      setBookings(DEMO_BOOKINGS);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     setUpdatingStatus([...updatingStatus, bookingId]);
@@ -301,7 +305,8 @@ export function BookingManagement() {
     .filter((b) => statusFilterEvents === "all" || b.status === statusFilterEvents)
     .filter(
       (b) =>
-        paymentFilterEvents === "all" || (b.paymentStatus ?? "requires_payment") === paymentFilterEvents,
+        paymentFilterEvents === "all" ||
+        (b.paymentStatus ?? "requires_payment") === paymentFilterEvents,
     );
 
   if (loading) {
@@ -319,7 +324,12 @@ export function BookingManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-2xl font-bold">Управление бронированиями</h3>
-        <Button onClick={fetchBookings} variant="outline" size="sm" data-testid="btn-refresh-bookings">
+        <Button
+          onClick={fetchBookings}
+          variant="outline"
+          size="sm"
+          data-testid="btn-refresh-bookings"
+        >
           <RefreshCw className="mr-2 h-4 w-4" />
           Обновить
         </Button>
@@ -338,54 +348,58 @@ export function BookingManagement() {
 
       <Tabs defaultValue="tables" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="tables" data-testid="tab-tables">Столики (<span data-testid="tab-tables-count">{tableReservationsAll.length}</span>)</TabsTrigger>
-          <TabsTrigger value="events" data-testid="tab-events">Мероприятия (<span data-testid="tab-events-count">{eventBookingsAll.length}</span>)</TabsTrigger>
+          <TabsTrigger value="tables" data-testid="tab-tables">
+            Столики (<span data-testid="tab-tables-count">{tableReservationsAll.length}</span>)
+          </TabsTrigger>
+          <TabsTrigger value="events" data-testid="tab-events">
+            Мероприятия (<span data-testid="tab-events-count">{eventBookingsAll.length}</span>)
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tables" className="space-y-4">
           {/* Панель фильтров по статусам для столиков */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-muted-foreground">Статус:</span>
-            <Button
+            <ToggleGroup
+              type="single"
+              value={statusFilterTables}
+              onValueChange={(value) => {
+                if (value) setStatusFilterTables(value as typeof statusFilterTables);
+              }}
               size="sm"
-              variant={statusFilterTables === "all" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("all")}
-              data-testid="tables-status-all"
+              variant="outline"
+              aria-label="Фильтр статуса столиков"
             >
-              Все (<span data-testid="tables-status-all-count">{tableReservationsAll.length}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "pending" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("pending")}
-              data-testid="tables-status-pending"
-            >
-              Ожидает (<span data-testid="tables-status-pending-count">{tableStatusCounts.pending}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "confirmed" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("confirmed")}
-              data-testid="tables-status-confirmed"
-            >
-              Подтверждено (<span data-testid="tables-status-confirmed-count">{tableStatusCounts.confirmed}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "completed" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("completed")}
-              data-testid="tables-status-completed"
-            >
-              Завершено (<span data-testid="tables-status-completed-count">{tableStatusCounts.completed}</span>)
-            </Button>
-            <Button
-              size="sm"
-              variant={statusFilterTables === "cancelled" ? "default" : "outline"}
-              onClick={() => setStatusFilterTables("cancelled")}
-              data-testid="tables-status-cancelled"
-            >
-              Отменено (<span data-testid="tables-status-cancelled-count">{tableStatusCounts.cancelled}</span>)
-            </Button>
+              <ToggleGroupItem value="all" data-testid="tables-status-all">
+                Все (
+                <span data-testid="tables-status-all-count">{tableReservationsAll.length}</span>)
+              </ToggleGroupItem>
+              <ToggleGroupItem value="pending" data-testid="tables-status-pending">
+                Ожидает (
+                <span data-testid="tables-status-pending-count">{tableStatusCounts.pending}</span>)
+              </ToggleGroupItem>
+              <ToggleGroupItem value="confirmed" data-testid="tables-status-confirmed">
+                Подтверждено (
+                <span data-testid="tables-status-confirmed-count">
+                  {tableStatusCounts.confirmed}
+                </span>
+                )
+              </ToggleGroupItem>
+              <ToggleGroupItem value="completed" data-testid="tables-status-completed">
+                Завершено (
+                <span data-testid="tables-status-completed-count">
+                  {tableStatusCounts.completed}
+                </span>
+                )
+              </ToggleGroupItem>
+              <ToggleGroupItem value="cancelled" data-testid="tables-status-cancelled">
+                Отменено (
+                <span data-testid="tables-status-cancelled-count">
+                  {tableStatusCounts.cancelled}
+                </span>
+                )
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           {tableReservations.length === 0 ? (
@@ -396,13 +410,20 @@ export function BookingManagement() {
             </Card>
           ) : (
             tableReservations.map((booking) => (
-              <Card key={booking.id} className="border-l-4 border-l-blue-500" data-testid={`table-booking-card-${booking.id}`}>
+              <Card
+                key={booking.id}
+                className="border-l-4 border-l-blue-500"
+                data-testid={`table-booking-card-${booking.id}`}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-lg">{booking.name}</CardTitle>
                       <div className="mt-2 flex gap-2">
-                        <Badge className={getStatusColor(booking.status)} data-testid="table-status-badge">
+                        <Badge
+                          className={getStatusColor(booking.status)}
+                          data-testid="table-status-badge"
+                        >
                           {booking.status === "pending"
                             ? "Ожидает"
                             : booking.status === "confirmed"
@@ -500,7 +521,8 @@ export function BookingManagement() {
                 onClick={() => setStatusFilterEvents("all")}
                 data-testid="events-status-all"
               >
-                Все (<span data-testid="events-status-all-count">{eventFilteredByPayment.length}</span>)
+                Все (
+                <span data-testid="events-status-all-count">{eventFilteredByPayment.length}</span>)
               </Button>
               <Button
                 size="sm"
@@ -508,7 +530,8 @@ export function BookingManagement() {
                 onClick={() => setStatusFilterEvents("pending")}
                 data-testid="events-status-pending"
               >
-                Ожидает (<span data-testid="events-status-pending-count">{eventStatusCounts.pending}</span>)
+                Ожидает (
+                <span data-testid="events-status-pending-count">{eventStatusCounts.pending}</span>)
               </Button>
               <Button
                 size="sm"
@@ -516,7 +539,11 @@ export function BookingManagement() {
                 onClick={() => setStatusFilterEvents("confirmed")}
                 data-testid="events-status-confirmed"
               >
-                Подтверждено (<span data-testid="events-status-confirmed-count">{eventStatusCounts.confirmed}</span>)
+                Подтверждено (
+                <span data-testid="events-status-confirmed-count">
+                  {eventStatusCounts.confirmed}
+                </span>
+                )
               </Button>
               <Button
                 size="sm"
@@ -524,7 +551,11 @@ export function BookingManagement() {
                 onClick={() => setStatusFilterEvents("completed")}
                 data-testid="events-status-completed"
               >
-                Завершено (<span data-testid="events-status-completed-count">{eventStatusCounts.completed}</span>)
+                Завершено (
+                <span data-testid="events-status-completed-count">
+                  {eventStatusCounts.completed}
+                </span>
+                )
               </Button>
               <Button
                 size="sm"
@@ -532,27 +563,33 @@ export function BookingManagement() {
                 onClick={() => setStatusFilterEvents("cancelled")}
                 data-testid="events-status-cancelled"
               >
-                Отменено (<span data-testid="events-status-cancelled-count">{eventStatusCounts.cancelled}</span>)
+                Отменено (
+                <span data-testid="events-status-cancelled-count">
+                  {eventStatusCounts.cancelled}
+                </span>
+                )
               </Button>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-muted-foreground">Оплата:</span>
-               <Button
-                 size="sm"
-                 variant={paymentFilterEvents === "all" ? "default" : "outline"}
-                 onClick={() => setPaymentFilterEvents("all")}
-                 data-testid="events-payment-all"
-               >
-                 Все (<span data-testid="events-payment-all-count">{eventFilteredByStatus.length}</span>)
-               </Button>
+              <Button
+                size="sm"
+                variant={paymentFilterEvents === "all" ? "default" : "outline"}
+                onClick={() => setPaymentFilterEvents("all")}
+                data-testid="events-payment-all"
+              >
+                Все (
+                <span data-testid="events-payment-all-count">{eventFilteredByStatus.length}</span>)
+              </Button>
               <Button
                 size="sm"
                 variant={paymentFilterEvents === "paid" ? "default" : "outline"}
                 onClick={() => setPaymentFilterEvents("paid")}
                 data-testid="events-payment-paid"
               >
-                Оплачено (<span data-testid="events-payment-paid-count">{eventPaymentCounts.paid}</span>)
+                Оплачено (
+                <span data-testid="events-payment-paid-count">{eventPaymentCounts.paid}</span>)
               </Button>
               <Button
                 size="sm"
@@ -560,7 +597,9 @@ export function BookingManagement() {
                 onClick={() => setPaymentFilterEvents("pending")}
                 data-testid="events-payment-pending"
               >
-                Ожидает оплаты (<span data-testid="events-payment-pending-count">{eventPaymentCounts.pending}</span>)
+                Ожидает оплаты (
+                <span data-testid="events-payment-pending-count">{eventPaymentCounts.pending}</span>
+                )
               </Button>
               <Button
                 size="sm"
@@ -568,7 +607,11 @@ export function BookingManagement() {
                 onClick={() => setPaymentFilterEvents("requires_payment")}
                 data-testid="events-payment-requires_payment"
               >
-                Требует оплаты (<span data-testid="events-payment-requires_payment-count">{eventPaymentCounts.requires_payment}</span>)
+                Требует оплаты (
+                <span data-testid="events-payment-requires_payment-count">
+                  {eventPaymentCounts.requires_payment}
+                </span>
+                )
               </Button>
             </div>
           </div>
@@ -581,35 +624,42 @@ export function BookingManagement() {
             </Card>
           ) : (
             eventBookings.map((booking) => (
-              <Card key={booking.id} className="border-l-4 border-l-green-500" data-testid={`event-booking-card-${booking.id}`}>
-                 <CardHeader>
-                   <div className="flex items-start justify-between">
-                     <div>
-                       <CardTitle className="text-lg">{booking.name}</CardTitle>
-                       <p className="text-muted-foreground">{booking.eventTitle}</p>
-                       <div className="mt-2 flex gap-2">
-                          <Badge className={getStatusColor(booking.status)}>
-                             {booking.status === "pending"
-                               ? "Ожидает"
-                               : booking.status === "confirmed"
-                                 ? "Подтверждено"
-                                 : booking.status === "cancelled"
-                                   ? "Отменено"
-                                   : "Завершено"}
-                           </Badge>
-                           {booking.paymentStatus && (
-                              <Badge className={getPaymentStatusColor(booking.paymentStatus)} data-testid="event-payment-badge">
-                                 {booking.paymentStatus === "paid"
-                                   ? "Оплачено"
-                                   : booking.paymentStatus === "pending"
-                                     ? "Ожидает оплаты"
-                                     : booking.paymentStatus === "requires_payment"
-                                       ? "Требует оплаты"
-                                       : booking.paymentStatus}
-                             </Badge>
-                           )}
-                         </div>
-                     </div>
+              <Card
+                key={booking.id}
+                className="border-l-4 border-l-green-500"
+                data-testid={`event-booking-card-${booking.id}`}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{booking.name}</CardTitle>
+                      <p className="text-muted-foreground">{booking.eventTitle}</p>
+                      <div className="mt-2 flex gap-2">
+                        <Badge className={getStatusColor(booking.status)}>
+                          {booking.status === "pending"
+                            ? "Ожидает"
+                            : booking.status === "confirmed"
+                              ? "Подтверждено"
+                              : booking.status === "cancelled"
+                                ? "Отменено"
+                                : "Завершено"}
+                        </Badge>
+                        {booking.paymentStatus && (
+                          <Badge
+                            className={getPaymentStatusColor(booking.paymentStatus)}
+                            data-testid="event-payment-badge"
+                          >
+                            {booking.paymentStatus === "paid"
+                              ? "Оплачено"
+                              : booking.paymentStatus === "pending"
+                                ? "Ожидает оплаты"
+                                : booking.paymentStatus === "requires_payment"
+                                  ? "Требует оплаты"
+                                  : booking.paymentStatus}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                     {/* edited: text-gray-500 -> text-muted-foreground */}
                     <div className="text-right text-sm text-muted-foreground">
                       <p>Создано: {formatDate(booking.createdAt)}</p>

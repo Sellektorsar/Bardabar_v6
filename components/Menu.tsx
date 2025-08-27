@@ -4,8 +4,24 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
+// Добавляем явные типы для элементов меню, чтобы свойство isSpecial стало опциональным
+// и корректно воспринималось в строгом режиме TypeScript
+type MenuItem = {
+  name: string;
+  description: string;
+  price: string;
+  image: string;
+  allergens: string[];
+  isSpecial?: boolean;
+};
+
+type MenuCategory = {
+  title: string;
+  items: MenuItem[];
+};
+
 export function Menu() {
-  const menuCategories = [
+  const menuCategories: MenuCategory[] = [
     {
       title: "Горячие блюда",
       items: [
@@ -75,7 +91,8 @@ export function Menu() {
         {
           name: "Греческий салат",
           description: "Свежие овощи с сыром фета и оливковым маслом",
-          price:
+          price: "590 ₽",
+          image:
             "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
           allergens: ["молочные продукты"],
         },

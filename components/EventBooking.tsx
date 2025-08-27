@@ -86,7 +86,9 @@ const markDemoEventPaid = (id: string) => {
       b.id === id ? { ...b, paymentStatus: "paid", status: "confirmed" } : b,
     );
     localStorage.setItem("demo_bookings", JSON.stringify(updated));
-  } catch {}
+  } catch (e) {
+    console.error("Не удалось пометить демо-событие как оплачено:", e);
+  }
 };
 
 export function EventBooking({ event, trigger }: EventBookingProps) {
