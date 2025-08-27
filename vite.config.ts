@@ -1,4 +1,4 @@
-﻿import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 
@@ -8,6 +8,11 @@ export default defineConfig({
     port: 5173,
     host: true,
     open: false,
+  },
+  preview: {
+    host: true,
+    // Разрешаем публичный домен Railway для vite preview в продакшне
+    allowedHosts: ["bardabarv6-production.up.railway.app"],
   },
   resolve: {
     alias: {
