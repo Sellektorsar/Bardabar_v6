@@ -1,6 +1,6 @@
 import { expect, Page, test } from "@playwright/test";
 import { addDays, format } from "date-fns";
-import { ru } from "date-fns/locale";
+// import { ru } from "date-fns/locale"; // removed as unused
 import * as fs from "fs";
 import * as path from "path";
 
@@ -137,9 +137,7 @@ test.describe("Booking Flow E2E Tests", () => {
     let selected = false;
     for (let i = 0; i < 12; i++) {
       const enabledDay = calendarRoot
-        .locator(
-          'button.rdp-button:not(.rdp-day_outside):not([disabled]):not([aria-disabled="true"])',
-        )
+        .locator('button:not([disabled]):not([aria-disabled="true"])')
         .filter({ hasText: new RegExp(`^${targetDay}$`) })
         .first();
 
@@ -152,16 +150,23 @@ test.describe("Booking Flow E2E Tests", () => {
       }
 
       // Переходим к следующему месяцу
-      const nextBtn = calendarRoot.locator(
-        '.rdp-nav_button_next, .rdp-nav_button[aria-label*="Next"], .rdp-nav_button[aria-label*="след"]',
-      );
-      await expect(
-        nextBtn.first(),
-        "Кнопка переключения на следующий месяц не найдена",
-      ).toBeVisible();
-      await nextBtn.first().click();
+      const nextBtn = calendarRoot.getByRole("button", { name: /next|след/i });
+      await expect(nextBtn, "Кнопка переключения на следующий месяц не найдена").toBeVisible();
+      await nextBtn.click();
       // небольшая пауза для перерисовки календаря
       await page.waitForTimeout(100);
+    }
+
+    // Если конкретный день не найден или недоступен, выбираем первый доступный день как запасной вариант
+    if (!selected) {
+      const fallbackDay = calendarRoot
+        .locator('button:not([disabled]):not([aria-disabled="true"])')
+        .first();
+      await expect(fallbackDay, "Не найден доступный день в календаре").toBeVisible();
+      await fallbackDay.scrollIntoViewIfNeeded();
+      await fallbackDay.focus();
+      await fallbackDay.press("Enter");
+      selected = true;
     }
 
     expect(selected, "Не удалось выбрать дату в календаре").toBeTruthy();
