@@ -1,5 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import * as fs from "fs";
 import * as path from "path";
@@ -28,24 +28,15 @@ test.describe("Booking Flow E2E Tests", () => {
   });
 
   test("Complete booking flow with demo mode verification", async ({ page }) => {
-    // Выбираем безопасную дату в пределах текущего месяца, чтобы избежать переключения месяца в календаре
+    // Выбираем дату в будущем (в пределах ближайших 5 дней). Если месяц сменится, календарь будет перелистан автоматически ниже.
     const today = new Date();
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const plusFiveDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5);
-    const safeDate =
-      plusFiveDays <= endOfMonth
-        ? plusFiveDays
-        : new Date(
-            endOfMonth.getFullYear(),
-            endOfMonth.getMonth(),
-            Math.max(1, endOfMonth.getDate() - 1),
-          );
+    const targetDate = addDays(today, 5);
 
     const testData = {
       name: "Иван Тестов",
       phone: "+7 (999) 123-45-67",
       email: "ivan.testov@example.com",
-      date: safeDate, // безопасная дата в текущем месяце
+      date: targetDate, // гарантированно не прошедшая дата
       time: "19:00",
       guests: "4",
       specialRequests: "Столик у окна, если возможно",
@@ -140,23 +131,40 @@ test.describe("Booking Flow E2E Tests", () => {
     const calendarRoot = page.locator(".rdp");
     await expect(calendarRoot).toBeVisible();
 
-    // Выбираем дату по тексту кнопки дня (число), чтобы не зависеть от aria-label и локали
+    // Выбираем дату по тексту кнопки дня (число). Если нужный день недоступен в текущем месяце, перелистываем месяц вперёд.
     const targetDay = format(testData.date, "d");
-    const dayButton = calendarRoot
-      .locator(
-        'button.rdp-button:not(.rdp-day_outside):not([disabled]):not([aria-disabled="true"])',
-      )
-      .filter({ hasText: new RegExp(`^${targetDay}$`) })
-      .first();
 
-    await expect(dayButton).toBeVisible();
-    await expect(dayButton).toBeEnabled();
-    // Иногда календарь частично за пределами вьюпорта, подстрахуемся
-    await dayButton.scrollIntoViewIfNeeded();
+    let selected = false;
+    for (let i = 0; i < 12; i++) {
+      const enabledDay = calendarRoot
+        .locator(
+          'button.rdp-button:not(.rdp-day_outside):not([disabled]):not([aria-disabled="true"])',
+        )
+        .filter({ hasText: new RegExp(`^${targetDay}$`) })
+        .first();
 
-    // Вместо клика мышью используем доступный выбор через клавиатуру, чтобы обойти перехват указателя
-    await dayButton.focus();
-    await dayButton.press("Enter");
+      if (await enabledDay.count()) {
+        await enabledDay.scrollIntoViewIfNeeded();
+        await enabledDay.focus();
+        await enabledDay.press("Enter");
+        selected = true;
+        break;
+      }
+
+      // Переходим к следующему месяцу
+      const nextBtn = calendarRoot.locator(
+        '.rdp-nav_button_next, .rdp-nav_button[aria-label*="Next"], .rdp-nav_button[aria-label*="след"]',
+      );
+      await expect(
+        nextBtn.first(),
+        "Кнопка переключения на следующий месяц не найдена",
+      ).toBeVisible();
+      await nextBtn.first().click();
+      // небольшая пауза для перерисовки календаря
+      await page.waitForTimeout(100);
+    }
+
+    expect(selected, "Не удалось выбрать дату в календаре").toBeTruthy();
 
     // Выбор времени
     const timeCombo = page.locator('[role="combobox"]', { hasText: "Выберите время" });
