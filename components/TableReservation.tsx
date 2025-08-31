@@ -77,6 +77,19 @@ export function TableReservation({
   const [error, setError] = useState("");
   const [isProjectPaused, setIsProjectPaused] = useState(false);
 
+  // Вычисляемая валидность полей для UX (aria и disable сабмита)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = formData.email.trim() === "" || emailRegex.test(formData.email.trim());
+  const isPhoneValid = formData.phone.replace(/\D/g, "").length >= 10;
+  const isNameValid = formData.name.trim().length >= 2;
+  const isFormValid =
+    isNameValid &&
+    isPhoneValid &&
+    Boolean(formData.date) &&
+    Boolean(formData.time) &&
+    Boolean(formData.guests) &&
+    isEmailValid;
+
   const timeSlots = [
     "12:00",
     "12:30",
@@ -266,7 +279,7 @@ export function TableReservation({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700" role="alert" aria-live="polite">
               {error}
             </div>
           )}
@@ -276,12 +289,22 @@ export function TableReservation({
               <Label htmlFor="name">Имя *</Label>
               <Input
                 id="name"
+                name="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ваше имя"
+                autoComplete="name"
+                inputMode="text"
+                aria-invalid={!isNameValid}
+                aria-describedby="name-error"
                 required
               />
+              {!isNameValid && formData.name.trim().length > 0 && (
+                <span id="name-error" role="alert" className="mt-1 block text-sm text-red-600">
+                  Укажите имя (не короче 2 символов).
+                </span>
+              )}
             </div>
             <div>
               <Label htmlFor="phone">Телефон *</Label>
@@ -289,14 +312,57 @@ export function TableReservation({
                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="phone"
+                  name="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    let digits = raw.replace(/\D/g, "");
+                    if (!digits) {
+                      setFormData({ ...formData, phone: "" });
+                      return;
+                    }
+                    if (digits.startsWith("8")) {
+                      digits = "7" + digits.slice(1);
+                    }
+                    if (!digits.startsWith("7")) {
+                      digits = digits.startsWith("9") ? "7" + digits : "7" + digits.slice(0, 10);
+                    }
+                    digits = digits.slice(0, 11);
+                    const d = digits.slice(1);
+                    let formatted = "+7";
+                    if (d.length > 0) {
+                      formatted += " (" + d.slice(0, Math.min(3, d.length));
+                      if (d.length >= 3) {
+                        formatted += ")";
+                        if (d.length > 3) {
+                          formatted += " " + d.slice(3, Math.min(6, d.length));
+                          if (d.length > 6) {
+                            formatted += "-" + d.slice(6, Math.min(8, d.length));
+                            if (d.length > 8) {
+                              formatted += "-" + d.slice(8, Math.min(10, d.length));
+                            }
+                          }
+                        }
+                      }
+                    }
+                    setFormData({ ...formData, phone: formatted });
+                  }}
                   placeholder="+7 (999) 999-99-99"
                   className="pl-10"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  maxLength={18}
+                  aria-invalid={!isPhoneValid}
+                  aria-describedby="phone-error"
                   required
                 />
               </div>
+              {formData.phone.trim().length > 0 && !isPhoneValid && (
+                <span id="phone-error" role="alert" className="mt-1 block text-sm text-red-600">
+                  Укажите корректный телефон (не менее 10 цифр).
+                </span>
+              )}
             </div>
           </div>
 
@@ -306,13 +372,23 @@ export function TableReservation({
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="your@email.com"
                 className="pl-10"
+                autoComplete="email"
+                inputMode="email"
+                aria-invalid={!isEmailValid}
+                aria-describedby="email-error"
               />
             </div>
+            {formData.email.trim().length > 0 && !isEmailValid && (
+              <span id="email-error" role="alert" className="mt-1 block text-sm text-red-600">
+                Укажите корректный email или оставьте поле пустым.
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -320,7 +396,13 @@ export function TableReservation({
               <Label>Дата *</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Button
+                    id="date"
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                    aria-labelledby="date-label"
+                    aria-invalid={!formData.date}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.date
                       ? format(formData.date, "dd MMM yyyy", { locale: ru })
@@ -345,7 +427,7 @@ export function TableReservation({
                 value={formData.time}
                 onValueChange={(value) => setFormData({ ...formData, time: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="time" aria-labelledby="time-label" aria-invalid={!formData.time}>
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Выберите время" />
                 </SelectTrigger>
@@ -365,7 +447,7 @@ export function TableReservation({
                 value={formData.guests}
                 onValueChange={(value) => setFormData({ ...formData, guests: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="guests" aria-labelledby="guests-label" aria-invalid={!formData.guests}>
                   <Users className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Гости" />
                 </SelectTrigger>
@@ -384,6 +466,7 @@ export function TableReservation({
             <Label htmlFor="specialRequests">Особые пожелания</Label>
             <Textarea
               id="specialRequests"
+              name="specialRequests"
               value={formData.specialRequests}
               onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
               placeholder="Особые пожелания, аллергии, предпочтения по размещению..."
@@ -394,14 +477,7 @@ export function TableReservation({
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-            disabled={
-              isSubmitting ||
-              !formData.name.trim() ||
-              !formData.phone.trim() ||
-              !formData.date ||
-              !formData.time ||
-              !formData.guests
-            }
+            disabled={isSubmitting || !isFormValid}
           >
             {isSubmitting ? (
               <>
