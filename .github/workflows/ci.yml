@@ -65,24 +65,51 @@ jobs:
     name: Deploy to VPS (rsync over SSH)
     needs: build-and-test
     runs-on: ubuntu-latest
-    # Run only on main, when deployment is enabled AND all secrets are present
-    if: ${{ github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' && secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_HOST != '' && secrets.DEPLOY_PATH != '' }}
+    # Run only on main when deployment is enabled (secrets checked at step level)
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' }}
     env:
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_SSH_PORT_SECRET: ${{ secrets.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_PORT_VAR: ${{ vars.DEPLOY_SSH_PORT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check required secrets present
+        shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ env.DEPLOY_SSH_KEY }}
+          DEPLOY_USER: ${{ env.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        run: |
+          missing=0
+          for v in DEPLOY_SSH_KEY DEPLOY_USER DEPLOY_HOST DEPLOY_PATH; do
+            if [ -z "${!v}" ]; then
+              echo "::warning title=Missing secret::$v is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 0 ]; then
+            echo "HAVE_SECRETS=true" >> "$GITHUB_ENV"
+            echo "Secrets OK"
+          else
+            echo "HAVE_SECRETS=false" >> "$GITHUB_ENV"
+            echo "Secrets missing, deployment steps will be skipped"
+          fi
+
       - name: Download build artifact
+        if: env.HAVE_SECRETS == 'true'
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Prepare SSH key
+        if: env.HAVE_SECRETS == 'true'
         shell: bash
         env:
           SSH_KEY: ${{ env.DEPLOY_SSH_KEY }}
@@ -91,16 +118,49 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy via rsync
+      - name: Preflight SSH connectivity
+        if: env.HAVE_SECRETS == 'true'
+        shell: bash
+        env:
+          DEPLOY_USER: ${{ env.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
+        run: |
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          echo "Testing SSH connection to $DEPLOY_USER@$DEPLOY_HOST:$PORT"
+          ssh -p "$PORT" -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "echo 'SSH OK'"
+
+      - name: Ensure remote path exists
+        if: env.HAVE_SECRETS == 'true'
         shell: bash
         env:
           DEPLOY_USER: ${{ env.DEPLOY_USER }}
           DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
           DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
         run: |
-          rsync -az --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          ssh -p "$PORT" -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
+
+      - name: Deploy via rsync
+        if: env.HAVE_SECRETS == 'true'
+        shell: bash
+        env:
+          DEPLOY_USER: ${{ env.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
+        run: |
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          rsync -az --delete -e "ssh -p $PORT -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
+      - name: Skip deploy (secrets missing)
+        if: env.HAVE_SECRETS == 'false'
+        run: echo "Skipping deploy: required secrets missing"
 # Notes:
 # - Set repository variable DEPLOY_ENABLED=true to enable deployment on main branch.
 # - Required secrets: DEPLOY_SSH_KEY (private key), DEPLOY_USER, DEPLOY_HOST, DEPLOY_PATH.
