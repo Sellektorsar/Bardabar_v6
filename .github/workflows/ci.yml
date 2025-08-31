@@ -72,7 +72,8 @@ jobs:
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT != '' && secrets.DEPLOY_SSH_PORT || (vars.DEPLOY_SSH_PORT != '' && vars.DEPLOY_SSH_PORT || '22') }}
+      DEPLOY_SSH_PORT_SECRET: ${{ secrets.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_PORT_VAR: ${{ vars.DEPLOY_SSH_PORT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -97,10 +98,12 @@ jobs:
         env:
           DEPLOY_USER: ${{ env.DEPLOY_USER }}
           DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
-          DEPLOY_SSH_PORT: ${{ env.DEPLOY_SSH_PORT }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
         run: |
-          echo "Testing SSH connection to $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_SSH_PORT"
-          ssh -p "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "echo 'SSH OK'"
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          echo "Testing SSH connection to $DEPLOY_USER@$DEPLOY_HOST:$PORT"
+          ssh -p "$PORT" -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "echo 'SSH OK'"
 
       - name: Ensure remote path exists
         shell: bash
@@ -108,9 +111,11 @@ jobs:
           DEPLOY_USER: ${{ env.DEPLOY_USER }}
           DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
           DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
-          DEPLOY_SSH_PORT: ${{ env.DEPLOY_SSH_PORT }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
         run: |
-          ssh -p "$DEPLOY_SSH_PORT" -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          ssh -p "$PORT" -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
 
       - name: Deploy via rsync
         shell: bash
@@ -118,9 +123,11 @@ jobs:
           DEPLOY_USER: ${{ env.DEPLOY_USER }}
           DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
           DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
-          DEPLOY_SSH_PORT: ${{ env.DEPLOY_SSH_PORT }}
+          DEPLOY_SSH_PORT_SECRET: ${{ env.DEPLOY_SSH_PORT_SECRET }}
+          DEPLOY_SSH_PORT_VAR: ${{ env.DEPLOY_SSH_PORT_VAR }}
         run: |
-          rsync -az --delete -e "ssh -p $DEPLOY_SSH_PORT -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
+          PORT="${DEPLOY_SSH_PORT_SECRET:-${DEPLOY_SSH_PORT_VAR:-22}}"
+          rsync -az --delete -e "ssh -p $PORT -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
 # Notes:
