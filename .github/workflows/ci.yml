@@ -65,7 +65,8 @@ jobs:
     name: Deploy to VPS (rsync over SSH)
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' }}
+    # Run only on main, when deployment is enabled AND all secrets are present
+    if: ${{ github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' && secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_HOST != '' && secrets.DEPLOY_PATH != '' }}
     env:
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
