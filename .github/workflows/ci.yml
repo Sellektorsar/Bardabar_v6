@@ -65,7 +65,12 @@ jobs:
     name: Deploy to VPS (rsync over SSH)
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    if: ${{ github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' }}
+    env:
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -79,7 +84,7 @@ jobs:
       - name: Prepare SSH key
         shell: bash
         env:
-          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KEY: ${{ env.DEPLOY_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa
@@ -88,9 +93,9 @@ jobs:
       - name: Deploy via rsync
         shell: bash
         env:
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_USER: ${{ env.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ env.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
         run: |
           rsync -az --delete -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" \
             dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"

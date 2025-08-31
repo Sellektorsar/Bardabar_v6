@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier . --check",
     "format:fix": "prettier . --write",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:update": "playwright test --update-snapshots"

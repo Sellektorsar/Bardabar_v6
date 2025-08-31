@@ -57,5 +57,13 @@
       "jsr:@supabase/supabase-js@2.49.8": ["node_modules/@supabase/supabase-js"]
     }
   },
-  "include": ["src", "App.tsx", "components", "utils", "styles"]
+  "include": ["src", "App.tsx", "components", "utils", "styles"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "playwright-report",
+    "test-results",
+    "test-screenshots",
+    "supabase"
+  ]
 }
