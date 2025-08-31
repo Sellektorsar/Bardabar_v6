@@ -1,12 +1,12 @@
-"'use client'";
+"'use client'"
 
 import { Calendar, Clock, Heart, MapPin, Music, Ticket, Users, Utensils } from "lucide-react";
-import { toast } from "sonner";
 
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { EventBooking } from "./EventBooking";
 
 export function Events() {
   const upcomingEvents = [
@@ -88,10 +88,21 @@ export function Events() {
     });
   };
 
-  const handleBookEvent = (event: any) => {
-    toast.success(
-      `Спасибо за интерес к мероприятию "${event.title}"! Свяжитесь с нами по телефону для бронирования.`,
-    );
+  // Нормализуем данные события для компонента EventBooking
+  const normalizeEvent = (e: any) => {
+    const priceNum = e.isFree
+      ? 0
+      : parseInt(String(e.price).replace(/\D/g, "")) || 0;
+    const capacityNum = parseInt(String(e.capacity).replace(/\D/g, "")) || 50;
+    return {
+      id: String(e.id),
+      title: e.title,
+      date: e.date,
+      time: e.time,
+      price: priceNum,
+      capacity: capacityNum,
+      description: e.description,
+    };
   };
 
   return (
@@ -167,14 +178,18 @@ export function Events() {
 
                   <div className="flex items-center justify-between border-t border-border pt-4">
                     <div className="text-lg font-bold text-orange-600">{event.price}</div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleBookEvent(event)}
-                      className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                    >
-                      <Ticket className="mr-2 h-4 w-4" />
-                      {event.isFree ? "Забронировать" : "Купить билет"}
-                    </Button>
+                    <EventBooking
+                      event={normalizeEvent(event)}
+                      trigger={
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+                        >
+                          <Ticket className="mr-2 h-4 w-4" />
+                          {event.isFree ? "Забронировать" : "Купить билет"}
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -194,7 +209,7 @@ export function Events() {
           <Button
             size="lg"
             onClick={() =>
-              toast.success(
+              console.log(
                 "Свяжитесь с нами по телефону +7 (495) 123-45-67 для обсуждения вашего мероприятия!",
               )
             }

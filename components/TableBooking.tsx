@@ -65,6 +65,9 @@ export function TableBooking({ onClose }: TableBookingProps) {
 
   const guestOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
 
+  // Простейшая проверка валидности телефона: не менее 10 цифр
+  const isPhoneValid = formData.phone.replace(/\D/g, "").length >= 10;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -143,10 +146,55 @@ export function TableBooking({ onClose }: TableBookingProps) {
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+7 (999) 123-45-67"
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  let digits = raw.replace(/\D/g, "");
+                  if (!digits) {
+                    setFormData({ ...formData, phone: "" });
+                    return;
+                  }
+                  // Нормализуем российские номера: 8 -> 7, 9********* -> 7 9*********, иначе добавляем 7
+                  if (digits.startsWith("8")) {
+                    digits = "7" + digits.slice(1);
+                  }
+                  if (!digits.startsWith("7")) {
+                    digits = digits.startsWith("9") ? "7" + digits : "7" + digits.slice(0, 10);
+                  }
+                  digits = digits.slice(0, 11);
+
+                  const d = digits.slice(1);
+                  let formatted = "+7";
+                  if (d.length > 0) {
+                    formatted += " (" + d.slice(0, Math.min(3, d.length));
+                    if (d.length >= 3) {
+                      formatted += ")";
+                      if (d.length > 3) {
+                        formatted += " " + d.slice(3, Math.min(6, d.length));
+                        if (d.length > 6) {
+                          formatted += "-" + d.slice(6, Math.min(8, d.length));
+                          if (d.length > 8) {
+                            formatted += "-" + d.slice(8, Math.min(10, d.length));
+                          }
+                        }
+                      }
+                    }
+                  }
+
+                  setFormData({ ...formData, phone: formatted });
+                }}
+                placeholder="+7 (999) 999-99-99"
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={18}
+                aria-invalid={!isPhoneValid}
+                aria-describedby="phone-error"
                 required
               />
+              {formData.phone.trim().length > 0 && !isPhoneValid && (
+                <span id="phone-error" role="alert" className="mt-1 block text-sm text-red-600">
+                  Укажите корректный телефон (не менее 10 цифр).
+                </span>
+              )}
             </div>
           </div>
 
