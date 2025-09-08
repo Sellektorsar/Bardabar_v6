@@ -172,7 +172,7 @@ test.describe("Booking Flow E2E Tests", () => {
     expect(selected, "Не удалось выбрать дату в календаре").toBeTruthy();
 
     // Выбор времени
-    const timeCombo = page.locator('[role="combobox"]', { hasText: "Выберите время" });
+    const timeCombo = page.locator('button').filter({ hasText: 'Выберите время' });
     await timeCombo.scrollIntoViewIfNeeded();
     await timeCombo.click();
 

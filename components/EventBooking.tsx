@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  Banknote,
   Calendar,
   CheckCircle,
   Clock,
-  CreditCard,
   Loader2,
   Mail,
   Phone,
@@ -19,7 +17,6 @@ import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 interface Event {
   id: string;
@@ -97,12 +94,10 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
     phone: "",
     email: "",
     tickets: "1",
-    paymentMethod: "card",
+    paymentMethod: "cash",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -143,11 +138,7 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
             totalAmount,
           }) || `demo-event-${Date.now()}`;
         setBookingId(demoId);
-        if (event.price > 0 && formData.paymentMethod === "card") {
-          setShowPayment(true);
-        } else {
-          setSubmitted(true);
-        }
+        setSubmitted(true);
         console.log("Проект приостановлен (540). Включен демо-режим для бронирования мероприятия");
         return;
       }
@@ -160,11 +151,7 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
 
       setBookingId(data.booking.id);
 
-      if (event.price > 0 && formData.paymentMethod === "card") {
-        setShowPayment(true);
-      } else {
-        setSubmitted(true);
-      }
+      setSubmitted(true);
 
       console.log("Бронирование создано:", data.booking);
     } catch (error) {
@@ -183,11 +170,7 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
             totalAmount,
           }) || `demo-event-${Date.now()}`;
         setBookingId(demoId);
-        if (event.price > 0 && formData.paymentMethod === "card") {
-          setShowPayment(true);
-        } else {
-          setSubmitted(true);
-        }
+        setSubmitted(true);
         console.log("Сетевая/CORS ошибка. Включен демо-режим для бронирования мероприятия");
       } else {
         setError(msg);
@@ -197,63 +180,7 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
     }
   };
 
-  const handlePayment = async (cardData: any) => {
-    setIsProcessingPayment(true);
-    setError("");
 
-    try {
-      const response = await fetch(
-        `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/process-payment`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify({
-            bookingId,
-            paymentMethod: formData.paymentMethod,
-            cardData,
-          }),
-        },
-      );
-
-      // Graceful fallback: Supabase project paused
-      if (response.status === 540) {
-        // Отмечаем локальную демо-запись как оплаченную
-        markDemoEventPaid(bookingId);
-        setShowPayment(false);
-        setSubmitted(true);
-        console.log("Проект приостановлен (540). Включен демо-режим для платежа мероприятия");
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Ошибка обработки платежа");
-      }
-
-      setShowPayment(false);
-      setSubmitted(true);
-      console.log("Платеж обработан:", data);
-    } catch (error) {
-      console.error("Ошибка платежа:", error);
-      const msg = error instanceof Error ? error.message : "Ошибка обработки платежа";
-      // Graceful fallback: сетевые/CORS ошибки
-      if (/Network|CORS|Failed to fetch/i.test(msg)) {
-        // Отмечаем локальную демо-запись как оплаченную
-        markDemoEventPaid(bookingId);
-        setShowPayment(false);
-        setSubmitted(true);
-        console.log("Сетевая/CORS ошибка. Включен демо-режим для платежа мероприятия");
-      } else {
-        setError(msg);
-      }
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
 
   const resetForm = () => {
     setFormData({
@@ -261,10 +188,9 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
       phone: "",
       email: "",
       tickets: "1",
-      paymentMethod: "card",
+      paymentMethod: "cash",
     });
     setSubmitted(false);
-    setShowPayment(false);
     setBookingId("");
     setError("");
     setOpen(false);
@@ -279,16 +205,17 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
     });
   };
 
-  if (submitted) {
-    return (
-      <DialogContent className="max-w-md">
+  // Определяем содержимое диалога на основе состояния
+  const renderDialogContent = () => {
+    if (submitted) {
+      return (
         <div className="p-6 text-center">
           <CheckCircle className="mx-auto mb-4 h-16 w-16 text-primary" />
           <h3 className="mb-2 text-xl font-bold text-foreground">Бронирование подтверждено!</h3>
           <p className="mb-4 text-muted-foreground">
-            {event.price > 0 && formData.paymentMethod === "card"
-              ? "Оплата прошла успешно. Ваши билеты забронированы."
-              : "Ваши билеты забронированы. Оплата при посещении."}
+            {event.price > 0
+              ? "Ваши билеты забронированы. Оплата при посещении."
+              : "Ваши места забронированы!"}
           </p>
           <div className="mb-4 rounded-lg bg-muted p-4 text-sm">
             <p>
@@ -308,31 +235,12 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
             Закрыть
           </Button>
         </div>
-      </DialogContent>
-    );
-  }
+      );
+    }
 
-  if (showPayment) {
+    // Основная форма бронирования
     return (
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Оплата билетов</DialogTitle>
-        </DialogHeader>
-        <PaymentForm
-          amount={totalAmount}
-          onPayment={handlePayment}
-          onCancel={() => setShowPayment(false)}
-          isProcessing={isProcessingPayment}
-          error={error}
-        />
-      </DialogContent>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger || <Button>Забронировать</Button>}</DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <>
         <DialogHeader>
           <DialogTitle>Бронирование мероприятия</DialogTitle>
         </DialogHeader>
@@ -470,31 +378,7 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
               />
             </div>
 
-            {event.price > 0 && (
-              <div>
-                <Label>Способ оплаты</Label>
-                <RadioGroup
-                  value={formData.paymentMethod}
-                  onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
-                  className="mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="card" id="card" />
-                    <Label htmlFor="card" className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Онлайн оплата картой
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="cash" id="cash" />
-                    <Label htmlFor="cash" className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4" />
-                      Оплата при посещении
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
+
 
             <div className="border-t pt-4">
               <div className="flex items-center justify-between text-lg font-bold">
@@ -509,115 +393,22 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Обрабатываем...
                 </>
-              ) : event.price > 0 && formData.paymentMethod === "card" ? (
-                "Перейти к оплате"
               ) : (
                 "Забронировать"
               )}
             </Button>
           </form>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function PaymentForm({
-  amount,
-  onPayment,
-  onCancel,
-  isProcessing,
-  error,
-}: {
-  amount: number;
-  onPayment: (cardData: any) => void;
-  onCancel: () => void;
-  isProcessing: boolean;
-  error: string;
-}) {
-  const [cardData, setCardData] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
-    name: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onPayment(cardData);
+      </>
+    );
   };
 
   return (
-    <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-bold">К оплате: {amount} ₽</h3>
-        <p className="text-sm text-muted-foreground">Введите данные банковской карты</p>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label>Номер карты</Label>
-          <Input
-            type="text"
-            placeholder="1234 5678 9012 3456"
-            value={cardData.number}
-            onChange={(e) => setCardData({ ...cardData, number: e.target.value })}
-            maxLength={19}
-            required
-          />
-        </div>
-
-        <div>
-          <Label>Имя держателя карты</Label>
-          <Input
-            type="text"
-            placeholder="IVAN PETROV"
-            value={cardData.name}
-            onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Срок действия</Label>
-            <Input
-              type="text"
-              placeholder="MM/YY"
-              value={cardData.expiry}
-              onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
-              maxLength={5}
-              required
-            />
-          </div>
-          <div>
-            <Label>CVV</Label>
-            <Input
-              type="text"
-              placeholder="123"
-              value={cardData.cvv}
-              onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
-              maxLength={3}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Отмена
-          </Button>
-          <Button type="submit" disabled={isProcessing}>
-            {isProcessing ? "Обрабатываем..." : "Оплатить"}
-          </Button>
-        </div>
-      </form>
-    </div>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger || <Button>Забронировать</Button>}</DialogTrigger>
+      <DialogContent className={submitted ? "max-w-md" : "max-w-2xl"}>
+        {renderDialogContent()}
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1344,7 +1344,7 @@ export default function App() {
                     className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
                   >
                     <Ticket className="mr-2 h-4 w-4" />
-                    {event.isFree ? "Забронировать" : "Купить билет"}
+                    Забронировать
                   </Button>
                 </div>
               </div>

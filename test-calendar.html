@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест календаря</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .test-link:hover {
+            background: #0056b3;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тест календаря бронирования</h1>
+        
+        <div class="instructions">
+            <h3>Инструкции для тестирования:</h3>
+            <ol>
+                <li>Откройте приложение по ссылке ниже</li>
+                <li>Нажмите на кнопку "Забронировать столик" в Hero секции</li>
+                <li>Найдите поле "Дата *" и нажмите на кнопку "Выберите дату"</li>
+                <li>Проверьте, открывается ли календарь</li>
+                <li>Попробуйте выбрать дату</li>
+            </ol>
+        </div>
+        
+        <a href="http://localhost:5174" class="test-link" target="_blank">
+            Открыть приложение для тестирования
+        </a>
+        
+        <h3>Возможные проблемы и решения:</h3>
+        <ul>
+            <li><strong>Календарь не открывается:</strong> Проверьте консоль браузера на наличие JavaScript ошибок</li>
+            <li><strong>Кнопка не реагирует:</strong> Возможно, проблема с CSS z-index или pointer-events</li>
+            <li><strong>Календарь открывается, но не виден:</strong> Проблема с позиционированием или z-index</li>
+        </ul>
+        
+        <h3>Проверка в консоли браузера:</h3>
+        <p>Откройте DevTools (F12) и выполните в консоли:</p>
+        <code>
+            // Проверка наличия элементов<br>
+            console.log('Date button:', document.querySelector('#date'));<br>
+            console.log('Popover:', document.querySelector('[data-slot="popover"]'));<br>
+        </code>
+    </div>
+</body>
+</html>

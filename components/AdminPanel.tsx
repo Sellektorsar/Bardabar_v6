@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { AdminNotifications } from "./AdminNotifications";
 import { BookingManagement } from "./BookingManagement";
+import { EmailSettings } from "./EmailSettings";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -31,7 +32,7 @@ export function AdminPanel() {
       name: "Мария Петрова",
       position: "Бариста",
       description: "Мастер кофейного дела.",
-      image: "https://images.unsplash.com/photo-1494790108755-2616c8e3e7fa?w=400",
+      image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjNmNGY2Ii8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE2MCIgcj0iNjAiIGZpbGw9IiM5Y2EzYWYiLz4KPHBhdGggZD0iTTEyMCAzMDBjMC02NiA2MC0xMjAgMTMzLTEyMHMxMzMgNTQgMTMzIDEyMHYyMEgxMjB2LTIweiIgZmlsbD0iIzljYTNhZiIvPgo8L3N2Zz4K",
     },
   ]);
 
@@ -162,7 +163,7 @@ export function AdminPanel() {
       </div>
 
       <Tabs defaultValue="notifications" className="w-full">
-        <TabsList className="mb-8 grid w-full grid-cols-5">
+        <TabsList className="mb-8 grid w-full grid-cols-6">
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
             Уведомления
@@ -179,6 +180,10 @@ export function AdminPanel() {
             <Menu className="h-4 w-4" />
             Меню
           </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center gap-2">
+             <Mail className="h-4 w-4" />
+             Email
+           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Настройки
@@ -193,6 +198,11 @@ export function AdminPanel() {
         {/* Bookings Management */}
         <TabsContent value="bookings">
           <BookingManagement />
+        </TabsContent>
+
+        {/* Email Settings */}
+        <TabsContent value="email">
+          <EmailSettings />
         </TabsContent>
 
         {/* Staff Management */}

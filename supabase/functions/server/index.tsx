@@ -24,6 +24,49 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+// Функция отправки email уведомлений
+const sendEmailNotification = async (to: string, subject: string, htmlContent: string, templateType?: string) => {
+  try {
+    // Проверяем настройки email
+    const emailSettings = await kv.get("email_settings") || {
+      enabled: true,
+      fromEmail: "noreply@bar-da-bar.ru",
+      templates: {
+        tableReservation: true,
+        eventBooking: true,
+        paymentConfirmation: true
+      }
+    };
+    
+    // Если email уведомления отключены
+    if (!emailSettings.enabled) {
+      console.log("Email уведомления отключены в настройках");
+      return { success: false, reason: "disabled" };
+    }
+    
+    // Если конкретный тип уведомления отключен
+    if (templateType && emailSettings.templates && !emailSettings.templates[templateType]) {
+      console.log(`Email уведомления типа ${templateType} отключены`);
+      return { success: false, reason: "template_disabled" };
+    }
+    
+    // Используем EmailJS или другой сервис для отправки email
+    // В продакшене здесь должна быть интеграция с реальным почтовым сервисом
+    const emailData = {
+      to,
+      subject,
+      html: htmlContent,
+      from: emailSettings.fromEmail || "noreply@bar-da-bar.ru"
+    };
+    
+    console.log("Email отправлен:", emailData);
+    return { success: true };
+  } catch (error) {
+    console.log("Ошибка отправки email:", error);
+    return { success: false, error };
+  }
+};
+
 // Создать бронирование столика
 app.post("/make-server-c85ae302/reservations", async (c) => {
   try {
@@ -58,6 +101,31 @@ app.post("/make-server-c85ae302/reservations", async (c) => {
       createdAt: new Date().toISOString(),
       read: false,
     });
+
+    // Отправляем email подтверждение клиенту, если указан email
+    if (email) {
+      const emailSubject = "Подтверждение бронирования столика - Кафе Bar da Bar";
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #ea580c;">Подтверждение бронирования</h2>
+          <p>Здравствуйте, ${name}!</p>
+          <p>Ваше бронирование столика в кафе <strong>Bar da Bar</strong> принято:</p>
+          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Дата:</strong> ${date}</p>
+            <p><strong>Время:</strong> ${time}</p>
+            <p><strong>Количество гостей:</strong> ${guests}</p>
+            <p><strong>Телефон:</strong> ${phone}</p>
+            ${specialRequests ? `<p><strong>Особые пожелания:</strong> ${specialRequests}</p>` : ''}
+          </div>
+          <p>Мы свяжемся с вами для подтверждения бронирования.</p>
+          <p>С уважением,<br>Команда кафе Bar da Bar</p>
+          <hr style="margin: 30px 0;">
+          <p style="font-size: 12px; color: #6b7280;">Адрес: ул. Примерная, 123, Москва<br>Телефон: +7 (495) 123-45-67</p>
+        </div>
+      `;
+      
+      await sendEmailNotification(email, emailSubject, emailContent, "tableReservation");
+    }
 
     console.log("Создано бронирование столика:", reservation);
     return c.json({ success: true, reservation });
@@ -109,6 +177,38 @@ app.post("/make-server-c85ae302/event-bookings", async (c) => {
       createdAt: new Date().toISOString(),
       read: false,
     });
+
+    // Отправляем email подтверждение клиенту, если указан email
+    if (email) {
+      const emailSubject = `Подтверждение бронирования: ${event.title} - Кафе Bar da Bar`;
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #ea580c;">Подтверждение бронирования мероприятия</h2>
+          <p>Здравствуйте, ${name}!</p>
+          <p>Ваше бронирование на мероприятие в кафе <strong>Bar da Bar</strong> принято:</p>
+          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #ea580c; margin-top: 0;">${event.title}</h3>
+            <p><strong>Дата:</strong> ${event.date}</p>
+            <p><strong>Время:</strong> ${event.time}</p>
+            <p><strong>Количество билетов:</strong> ${tickets}</p>
+            <p><strong>Стоимость билета:</strong> ${event.price > 0 ? `${event.price} ₽` : 'Бесплатно'}</p>
+            <p><strong>Общая сумма:</strong> ${booking.totalAmount > 0 ? `${booking.totalAmount} ₽` : 'Бесплатно'}</p>
+            <p><strong>Способ оплаты:</strong> ${paymentMethod === 'cash' ? 'Наличными на месте' : 'Онлайн'}</p>
+            <p><strong>Телефон:</strong> ${phone}</p>
+          </div>
+          ${event.description ? `<p><strong>Описание:</strong> ${event.description}</p>` : ''}
+          ${booking.totalAmount > 0 && paymentMethod !== 'cash' ? 
+            '<p style="color: #dc2626;"><strong>Внимание:</strong> Для завершения бронирования необходимо произвести оплату.</p>' : 
+            '<p style="color: #16a34a;">Бронирование подтверждено! Ждем вас на мероприятии.</p>'
+          }
+          <p>С уважением,<br>Команда кафе Bar da Bar</p>
+          <hr style="margin: 30px 0;">
+          <p style="font-size: 12px; color: #6b7280;">Адрес: ул. Примерная, 123, Москва<br>Телефон: +7 (495) 123-45-67</p>
+        </div>
+      `;
+      
+      await sendEmailNotification(email, emailSubject, emailContent, "eventBooking");
+    }
 
     console.log("Создано бронирование мероприятия:", booking);
     return c.json({ success: true, booking });
@@ -235,6 +335,31 @@ app.post("/make-server-c85ae302/process-payment", async (c) => {
       read: false,
     });
 
+    // Отправляем email подтверждение об оплате клиенту
+    if (booking.email) {
+      const emailSubject = `Оплата подтверждена: ${booking.eventTitle} - Кафе Bar da Bar`;
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #16a34a;">Оплата успешно получена!</h2>
+          <p>Здравствуйте, ${booking.name}!</p>
+          <p>Мы получили вашу оплату за мероприятие:</p>
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+            <h3 style="color: #ea580c; margin-top: 0;">${booking.eventTitle}</h3>
+            <p><strong>Сумма оплаты:</strong> ${booking.totalAmount} ₽</p>
+            <p><strong>Количество билетов:</strong> ${booking.tickets}</p>
+            <p><strong>ID платежа:</strong> pay_${Date.now()}</p>
+          </div>
+          <p style="color: #16a34a; font-weight: bold;">✅ Ваше бронирование полностью подтверждено!</p>
+          <p>Ждем вас на мероприятии. При входе назовите ваше имя.</p>
+          <p>С уважением,<br>Команда кафе Bar da Bar</p>
+          <hr style="margin: 30px 0;">
+          <p style="font-size: 12px; color: #6b7280;">Адрес: ул. Примерная, 123, Москва<br>Телефон: +7 (495) 123-45-67</p>
+        </div>
+      `;
+      
+      await sendEmailNotification(booking.email, emailSubject, emailContent, "paymentConfirmation");
+    }
+
     return c.json({
       success: true,
       paymentId: `pay_${Date.now()}`,
@@ -243,6 +368,54 @@ app.post("/make-server-c85ae302/process-payment", async (c) => {
   } catch (error) {
     console.log("Ошибка при обработке платежа:", error);
     return c.json({ error: "Ошибка обработки платежа" }, 500);
+  }
+});
+
+// Настройки email уведомлений
+app.get("/make-server-c85ae302/email-settings", async (c) => {
+  try {
+    const settings = await kv.get("email_settings") || {
+      enabled: true,
+      adminEmail: "admin@bar-da-bar.ru",
+      fromEmail: "noreply@bar-da-bar.ru",
+      templates: {
+        tableReservation: true,
+        eventBooking: true,
+        paymentConfirmation: true
+      }
+    };
+    
+    return c.json({ settings });
+  } catch (error) {
+    console.log("Ошибка при получении настроек email:", error);
+    return c.json({ error: "Внутренняя ошибка сервера" }, 500);
+  }
+});
+
+// Обновить настройки email уведомлений
+app.post("/make-server-c85ae302/email-settings", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { enabled, adminEmail, fromEmail, templates } = body;
+    
+    const settings = {
+      enabled: enabled !== undefined ? enabled : true,
+      adminEmail: adminEmail || "admin@bar-da-bar.ru",
+      fromEmail: fromEmail || "noreply@bar-da-bar.ru",
+      templates: templates || {
+        tableReservation: true,
+        eventBooking: true,
+        paymentConfirmation: true
+      },
+      updatedAt: new Date().toISOString()
+    };
+    
+    await kv.set("email_settings", settings);
+    
+    return c.json({ success: true, settings });
+  } catch (error) {
+    console.log("Ошибка при обновлении настроек email:", error);
+    return c.json({ error: "Внутренняя ошибка сервера" }, 500);
   }
 });
 

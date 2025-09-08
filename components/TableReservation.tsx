@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon, CheckCircle, Clock, Loader2, Mail, Phone, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { projectId, publicAnonKey } from "../utils/supabase/info";
 import { Button } from "./ui/button";
@@ -76,6 +76,29 @@ export function TableReservation({
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isProjectPaused, setIsProjectPaused] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  // Автоматический сброс времени, если оно стало недоступным после изменения даты
+  useEffect(() => {
+    if (!formData.date || !formData.time) return;
+    
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Проверяем только для сегодняшней даты
+    if (selectedDate.getTime() === today.getTime()) {
+      const [hours, minutes] = formData.time.split(':').map(Number);
+      const slotTime = new Date();
+      slotTime.setHours(hours, minutes, 0, 0);
+      const now = new Date();
+      
+      // Если выбранное время уже прошло, сбрасываем его
+      if (slotTime <= now) {
+        setFormData(prev => ({ ...prev, time: "" }));
+      }
+    }
+  }, [formData.date, formData.time]);
 
   // Вычисляемая валидность полей для UX (aria и disable сабмита)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -153,6 +176,38 @@ export function TableReservation({
     if (!formData.guests) validations.push("Выберите количество гостей.");
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       validations.push("Укажите корректный email или оставьте поле пустым.");
+    }
+
+    // Проверка даты и времени
+    if (formData.date) {
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Проверка на прошлую дату
+      if (selectedDate < today) {
+        validations.push("Нельзя забронировать столик на прошедшую дату.");
+      }
+      
+      // Проверка времени для сегодняшней даты
+      if (selectedDate.getTime() === today.getTime() && formData.time) {
+        const [hours, minutes] = formData.time.split(':').map(Number);
+        const selectedDateTime = new Date();
+        selectedDateTime.setHours(hours, minutes, 0, 0);
+        const now = new Date();
+        
+        if (selectedDateTime <= now) {
+          validations.push("Выберите время, которое еще не прошло.");
+        }
+      }
+      
+      // Проверка рабочих часов (12:00 - 22:00)
+      if (formData.time) {
+        const [hours] = formData.time.split(':').map(Number);
+        if (hours < 12 || hours >= 22) {
+          validations.push("Бронирование доступно с 12:00 до 22:00.");
+        }
+      }
     }
 
     if (validations.length > 0) {
@@ -394,27 +449,72 @@ export function TableReservation({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
               <Label>Дата *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                    aria-labelledby="date-label"
-                    aria-invalid={!formData.date}
+              <div className="relative">
+                <Popover open={isCalendarOpen} onOpenChange={(open) => {
+                  console.log('Popover onOpenChange called with:', open);
+                  setIsCalendarOpen(open);
+                }}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${
+                        !formData.date ? "text-muted-foreground" : ""
+                      }`}
+                      aria-labelledby="date-label"
+                      aria-invalid={!formData.date}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        console.log('Date button clicked, current state:', isCalendarOpen);
+                        const newState = !isCalendarOpen;
+                        console.log('Setting calendar state to:', newState);
+                        setIsCalendarOpen(newState);
+                      }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date
+                        ? format(formData.date, "dd MMM yyyy", { locale: ru })
+                        : "Выберите дату"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-auto p-0 z-[9999]" 
+                    align="start"
+                    style={{ zIndex: 9999 }}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date
-                      ? format(formData.date, "dd MMM yyyy", { locale: ru })
-                      : "Выберите дату"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => setFormData({ ...formData, date })}
-                    disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => {
+                        console.log('Calendar date selected:', date);
+                        // Сбрасываем время при изменении даты для пересчета доступных слотов
+                        if (formData.time && date) {
+                        const selectedDate = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (selectedDate.getTime() === today.getTime()) {
+                          // Проверяем, доступно ли текущее время для новой даты
+                          const [hours, minutes] = formData.time.split(':').map(Number);
+                          const slotTime = new Date();
+                          slotTime.setHours(hours, minutes, 0, 0);
+                          const now = new Date();
+                          
+                          if (slotTime <= now) {
+                            setFormData(prev => ({ ...prev, date, time: "" }));
+                            setIsCalendarOpen(false);
+                            return;
+                          }
+                        }
+                      }
+                      setFormData({ ...formData, date });
+                      setIsCalendarOpen(false);
+                    }}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
@@ -432,11 +532,30 @@ export function TableReservation({
                   <SelectValue placeholder="Выберите время" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
+                  {timeSlots
+                    .filter((time) => {
+                      if (!formData.date) return true;
+                      
+                      const selectedDate = new Date(formData.date);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      
+                      // Если выбрана не сегодняшняя дата, показываем все слоты
+                      if (selectedDate.getTime() !== today.getTime()) return true;
+                      
+                      // Для сегодняшней даты фильтруем прошедшие слоты
+                      const [hours, minutes] = time.split(':').map(Number);
+                      const slotTime = new Date();
+                      slotTime.setHours(hours, minutes, 0, 0);
+                      const now = new Date();
+                      
+                      return slotTime > now;
+                    })
+                    .map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -461,9 +580,10 @@ export function TableReservation({
               </Select>
             </div>
           </div>
+        </div>
 
-          <div>
-            <Label htmlFor="specialRequests">Особые пожелания</Label>
+        <div>
+          <Label htmlFor="specialRequests">Особые пожелания</Label>
             <Textarea
               id="specialRequests"
               name="specialRequests"
@@ -472,9 +592,9 @@ export function TableReservation({
               placeholder="Особые пожелания, аллергии, предпочтения по размещению..."
               rows={3}
             />
-          </div>
+        </div>
 
-          <Button
+        <Button
             type="submit"
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
             disabled={isSubmitting || !isFormValid}
