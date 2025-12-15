@@ -19,23 +19,33 @@ export function NewsletterModal({ isOpen, onClose }: NewsletterModalProps) {
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    if (email) {
-      toast.success("Спасибо за подписку! Мы будем присылать вам новости о наших мероприятиях.");
-      setEmail("");
-      onClose();
-    } else {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       toast.error("Пожалуйста, введите email адрес");
+      return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      toast.error("Пожалуйста, введите корректный email адрес");
+      return;
+    }
+    toast.success("Спасибо за подписку! Мы будем присылать вам новости о наших мероприятиях.");
+    setEmail("");
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="newsletter-title"
+    >
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Подписка на новости</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
+            <CardTitle id="newsletter-title">Подписка на новости</CardTitle>
+            <Button variant="ghost" size="sm" onClick={onClose} aria-label="Закрыть">
+              <X className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </CardHeader>
@@ -45,12 +55,18 @@ export function NewsletterModal({ isOpen, onClose }: NewsletterModalProps) {
             ресторана
           </p>
           <div className="space-y-4">
-            <Input
-              type="email"
-              placeholder="Ваш email адрес"
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-            />
+            <div>
+              <label htmlFor="newsletter-email" className="sr-only">Email адрес</label>
+              <Input
+                id="newsletter-email"
+                type="email"
+                placeholder="Ваш email адрес"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </div>
             <Button
               onClick={handleSubmit}
               className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
