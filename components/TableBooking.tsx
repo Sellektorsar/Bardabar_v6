@@ -6,6 +6,7 @@ import { CalendarIcon, Clock, Mail, Phone, User, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { formatPhoneNumber, isValidPhone } from "../src/utils/formatters";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -65,8 +66,8 @@ export function TableBooking({ onClose }: TableBookingProps) {
 
   const guestOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
 
-  // Простейшая проверка валидности телефона: не менее 10 цифр
-  const isPhoneValid = formData.phone.replace(/\D/g, "").length >= 10;
+  // Проверка валидности телефона
+  const isPhoneValid = isValidPhone(formData.phone);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,42 +147,7 @@ export function TableBooking({ onClose }: TableBookingProps) {
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  let digits = raw.replace(/\D/g, "");
-                  if (!digits) {
-                    setFormData({ ...formData, phone: "" });
-                    return;
-                  }
-                  // Нормализуем российские номера: 8 -> 7, 9********* -> 7 9*********, иначе добавляем 7
-                  if (digits.startsWith("8")) {
-                    digits = "7" + digits.slice(1);
-                  }
-                  if (!digits.startsWith("7")) {
-                    digits = digits.startsWith("9") ? "7" + digits : "7" + digits.slice(0, 10);
-                  }
-                  digits = digits.slice(0, 11);
-
-                  const d = digits.slice(1);
-                  let formatted = "+7";
-                  if (d.length > 0) {
-                    formatted += " (" + d.slice(0, Math.min(3, d.length));
-                    if (d.length >= 3) {
-                      formatted += ")";
-                      if (d.length > 3) {
-                        formatted += " " + d.slice(3, Math.min(6, d.length));
-                        if (d.length > 6) {
-                          formatted += "-" + d.slice(6, Math.min(8, d.length));
-                          if (d.length > 8) {
-                            formatted += "-" + d.slice(8, Math.min(10, d.length));
-                          }
-                        }
-                      }
-                    }
-                  }
-
-                  setFormData({ ...formData, phone: formatted });
-                }}
+                onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                 placeholder="+7 (999) 999-99-99"
                 autoComplete="tel"
                 inputMode="tel"

@@ -39,3 +39,7 @@ Thumbs.db
 # Generated reports
 eslint-report.json
 .eslint-report.json
+
+# Screenshots
+*.png
+!public/*.png

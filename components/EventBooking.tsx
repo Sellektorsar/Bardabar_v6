@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { formatPhoneNumber, isValidPhone, isValidEmail } from "../src/utils/formatters";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -76,10 +77,16 @@ const saveDemoEventBooking = (payload: {
   }
 };
 
+interface DemoBooking {
+  id: string;
+  paymentStatus?: string;
+  status?: string;
+}
+
 const markDemoEventPaid = (id: string) => {
   try {
-    const existing = JSON.parse(localStorage.getItem("demo_bookings") || "[]");
-    const updated = existing.map((b: any) =>
+    const existing: DemoBooking[] = JSON.parse(localStorage.getItem("demo_bookings") || "[]");
+    const updated = existing.map((b) =>
       b.id === id ? { ...b, paymentStatus: "paid", status: "confirmed" } : b,
     );
     localStorage.setItem("demo_bookings", JSON.stringify(updated));
@@ -301,50 +308,18 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
                     name="phone"
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      let digits = raw.replace(/\D/g, "");
-                      if (!digits) {
-                        setFormData({ ...formData, phone: "" });
-                        return;
-                      }
-                      if (digits.startsWith("8")) {
-                        digits = "7" + digits.slice(1);
-                      }
-                      if (!digits.startsWith("7")) {
-                        digits = digits.startsWith("9") ? "7" + digits : "7" + digits.slice(0, 10);
-                      }
-                      digits = digits.slice(0, 11);
-                      const d = digits.slice(1);
-                      let formatted = "+7";
-                      if (d.length > 0) {
-                        formatted += " (" + d.slice(0, Math.min(3, d.length));
-                        if (d.length >= 3) {
-                          formatted += ")";
-                          if (d.length > 3) {
-                            formatted += " " + d.slice(3, Math.min(6, d.length));
-                            if (d.length > 6) {
-                              formatted += "-" + d.slice(6, Math.min(8, d.length));
-                              if (d.length > 8) {
-                                formatted += "-" + d.slice(8, Math.min(10, d.length));
-                              }
-                            }
-                          }
-                        }
-                      }
-                      setFormData({ ...formData, phone: formatted });
-                    }}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                     placeholder="+7 (999) 999-99-99"
                     className="pl-10"
                     autoComplete="tel"
                     inputMode="tel"
                     maxLength={18}
-                    aria-invalid={formData.phone.replace(/\D/g, "").length < 11}
+                    aria-invalid={!isValidPhone(formData.phone)}
                     aria-describedby="phone-error"
                     required
                   />
                 </div>
-                {formData.phone.trim().length > 0 && formData.phone.replace(/\D/g, "").length < 11 && (
+                {formData.phone.trim().length > 0 && !isValidPhone(formData.phone) && (
                   <span id="phone-error" role="alert" className="mt-1 block text-sm text-red-600">
                     Укажите корректный телефон (не менее 10 цифр).
                   </span>

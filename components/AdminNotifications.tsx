@@ -3,7 +3,11 @@
 import { Bell, Calendar, Check, CreditCard, Loader2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { projectId, publicAnonKey } from "../utils/supabase/info";
+import {
+  notificationsApi,
+  ProjectPausedError,
+  isNetworkError,
+} from "../src/api/client";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -67,37 +71,23 @@ export function AdminNotifications() {
       setLoading(true);
       setErrorMsg(null);
       setBackendUnavailable(false);
-      const url = `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/notifications`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        const paused = response.status === 540 || /Project paused/i.test(text);
-        if (paused) {
-          setBackendUnavailable(true);
-          setErrorMsg(
-            "Сервер уведомлений временно недоступен (Project Paused). Показаны демо-данные.",
-          );
-          // Остаёмся на текущих/мок-данных
-        } else {
-          setErrorMsg("Ошибка загрузки уведомлений. Попробуйте позже.");
-        }
-        setLoading(false);
-        return;
-      }
-      const data = await response.json();
-      setNotifications(data.notifications || []);
+
+      const data = await notificationsApi.getAll();
+      setNotifications(Array.isArray(data) ? data : []);
       setBackendUnavailable(false);
       setErrorMsg(null);
     } catch (e) {
       console.error("Сбой загрузки уведомлений:", e);
-      setBackendUnavailable(true);
-      setErrorMsg("Не удалось связаться с сервером уведомлений. Показаны демо-данные.");
+
+      if (e instanceof ProjectPausedError) {
+        setBackendUnavailable(true);
+        setErrorMsg("Сервер уведомлений временно недоступен (Project Paused). Показаны демо-данные.");
+      } else if (e instanceof Error && isNetworkError(e.message)) {
+        setBackendUnavailable(true);
+        setErrorMsg("Не удалось связаться с сервером уведомлений. Показаны демо-данные.");
+      } else {
+        setErrorMsg("Ошибка загрузки уведомлений. Попробуйте позже.");
+      }
     } finally {
       setLoading(false);
     }
@@ -106,38 +96,21 @@ export function AdminNotifications() {
   const markAsRead = async (notificationKey: string) => {
     setMarkingRead((prev) => [...prev, notificationKey]);
     try {
-      const url = `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/notifications/${encodeURIComponent(notificationKey)}`;
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        const paused = res.status === 540 || /Project paused/i.test(text);
-        if (paused) {
-          // Фолбэк: отмечаем локально как прочитанное
-          setBackendUnavailable(true);
-          setErrorMsg("Сервер уведомлений недоступен, отметка выполнена локально.");
-          setNotifications((prev) =>
-            prev.map((n) => (n.key === notificationKey ? { ...n, read: true } : n)),
-          );
-          return;
-        }
-        console.error("Ошибка отметки уведомления как прочитанного:", text);
-        return;
-      }
+      await notificationsApi.markAsRead(notificationKey);
       setNotifications((prev) =>
         prev.map((n) => (n.key === notificationKey ? { ...n, read: true } : n)),
       );
     } catch (e) {
       console.error("Сбой при отметке уведомления как прочитанного:", e);
-      // В офлайн-режиме также позволим локально отметить
-      setBackendUnavailable(true);
-      setErrorMsg("Нет связи с сервером, отметка выполнена локально.");
+
+      // Фолбэк: отмечаем локально как прочитанное
+      if (e instanceof ProjectPausedError) {
+        setBackendUnavailable(true);
+        setErrorMsg("Сервер уведомлений недоступен, отметка выполнена локально.");
+      } else {
+        setErrorMsg("Нет связи с сервером, отметка выполнена локально.");
+      }
+
       setNotifications((prev) =>
         prev.map((n) => (n.key === notificationKey ? { ...n, read: true } : n)),
       );

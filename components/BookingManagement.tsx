@@ -13,7 +13,7 @@ import {
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { reservationsApi, ProjectPausedError, isNetworkError } from "../src/api/client";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -118,36 +118,22 @@ export function BookingManagement() {
         return;
       }
 
-      const response = await fetch(
-        `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/reservations`,
-        {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-        },
-      );
-
-      // Фолбэк при статусе 540 (Project Paused)
-      if (response.status === 540) {
-        setIsProjectPaused(true);
-        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setBookings(data.bookings || []);
-        return;
-      }
-
-      // Любой не-OK ответ (например, 4xx/5xx без 540) — уходим в демо-режим
-      setIsProjectPaused(true);
-      setBookings(DEMO_BOOKINGS);
+      const data = await reservationsApi.getAll();
+      setBookings(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Ошибка при получении бронирований:", error);
-      // Сетевые/CORS ошибки: включаем демо-режим
-      setIsProjectPaused(true);
-      setBookings(DEMO_BOOKINGS);
+
+      // Фолбэк при паузе проекта или сетевых ошибках
+      if (
+        error instanceof ProjectPausedError ||
+        (error instanceof Error && isNetworkError(error.message))
+      ) {
+        setIsProjectPaused(true);
+        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
+      } else {
+        setIsProjectPaused(true);
+        setBookings(DEMO_BOOKINGS);
+      }
     } finally {
       setLoading(false);
     }
@@ -161,42 +147,7 @@ export function BookingManagement() {
     setUpdatingStatus([...updatingStatus, bookingId]);
 
     try {
-      const response = await fetch(
-        `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/reservations/${bookingId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        },
-      );
-
-      // Фолбэк при статусе 540 (Project Paused) — обновляем локально
-      if (response.status === 540) {
-        setIsProjectPaused(true);
-        setBookings(
-          bookings.map((booking) =>
-            booking.id === bookingId ? { ...booking, status: newStatus } : booking,
-          ),
-        );
-        updateDemoBookingStatus(bookingId, newStatus);
-        return;
-      }
-
-      if (response.ok) {
-        setBookings(
-          bookings.map((booking) =>
-            booking.id === bookingId ? { ...booking, status: newStatus } : booking,
-          ),
-        );
-        updateDemoBookingStatus(bookingId, newStatus);
-        return;
-      }
-
-      // Любой не-OK ответ — локальное обновление + демо-режим
-      setIsProjectPaused(true);
+      await reservationsApi.updateStatus(bookingId, newStatus);
       setBookings(
         bookings.map((booking) =>
           booking.id === bookingId ? { ...booking, status: newStatus } : booking,
@@ -205,13 +156,18 @@ export function BookingManagement() {
       updateDemoBookingStatus(bookingId, newStatus);
     } catch (error) {
       console.error("Ошибка при обновлении статуса:", error);
-      // Сетевые/CORS ошибки: локальное обновление + демо-режим
-      setIsProjectPaused(true);
+
+      // Фолбэк — обновляем локально
+      if (error instanceof ProjectPausedError) {
+        setIsProjectPaused(true);
+      }
+
       setBookings(
         bookings.map((booking) =>
           booking.id === bookingId ? { ...booking, status: newStatus } : booking,
         ),
       );
+      updateDemoBookingStatus(bookingId, newStatus);
     } finally {
       setUpdatingStatus(updatingStatus.filter((id) => id !== bookingId));
     }

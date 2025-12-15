@@ -1,4 +1,4 @@
-"'use client'"
+"use client";
 
 import { Calendar, Clock, Heart, MapPin, Music, Ticket, Users, Utensils } from "lucide-react";
 
@@ -7,6 +7,20 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { EventBooking } from "./EventBooking";
+
+interface LocalEvent {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  description: string;
+  image: string;
+  type: string;
+  capacity: string;
+  price: string;
+  isRecurring: boolean;
+  isFree: boolean;
+}
 
 export function Events() {
   const upcomingEvents = [
@@ -89,7 +103,7 @@ export function Events() {
   };
 
   // Нормализуем данные события для компонента EventBooking
-  const normalizeEvent = (e: any) => {
+  const normalizeEvent = (e: LocalEvent) => {
     const priceNum = e.isFree
       ? 0
       : parseInt(String(e.price).replace(/\D/g, "")) || 0;

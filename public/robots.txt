@@ -1,4 +1,18 @@
+# Robots.txt for Бардабар
 User-agent: *
 Allow: /
 
-Sitemap: https://bardabarv6-production.up.railway.app/sitemap.xml
+# Sitemap
+Sitemap: https://bardabar.ru/sitemap.xml
+
+# Disallow admin pages from indexing
+Disallow: /admin
+
+# Allow search engines to crawl all public pages
+Allow: /menu
+Allow: /events
+Allow: /gallery
+Allow: /reservation
+Allow: /reviews
+Allow: /about
+Allow: /contact

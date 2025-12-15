@@ -1,59 +1,18 @@
-"'use client'";
+"use client";
 
 import { Award, Coffee, Heart, Users } from "lucide-react";
 
+import type { TeamMember } from "../src/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface AboutProps {
-  isAdminMode?: boolean;
+  cafeName: string;
+  teamMembers: TeamMember[];
 }
 
-export function About({ isAdminMode: _isAdminMode }: AboutProps) {
-  const teamMembers = [
-    {
-      id: 1,
-      name: "Алексей Иванов",
-      position: "Шеф-повар",
-      description:
-        "Опытный шеф-повар с 15-летним стажем работы в лучших ресторанах Москвы. Специализируется на европейской и авторской кухне.",
-      image:
-        "https://images.unsplash.com/photo-1583394293214-28a5b42b6171?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      speciality: "Авторская кухня",
-    },
-    {
-      id: 2,
-      name: "Мария Петрова",
-      position: "Старший бариста",
-      description:
-        "Мастер кофейного дела, чемпион городских соревнований по латте-арт. Знает все секреты идеального кофе.",
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616c8e3e7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      speciality: "Кофейные напитки",
-    },
-    {
-      id: 3,
-      name: "Дмитрий Соколов",
-      position: "Су-шеф",
-      description:
-        "Правая рука шеф-повара, отвечает за качество каждого блюда. Мастер холодных закусок и десертов.",
-      image:
-        "https://images.unsplash.com/photo-1607631568010-a87245c0daf8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      speciality: "Десерты",
-    },
-    {
-      id: 4,
-      name: "Анна Васильева",
-      position: "Управляющая",
-      description:
-        "Обеспечивает безупречный сервис и уютную атмосферу. Всегда готова помочь с выбором и сделать ваш визит незабываемым.",
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      speciality: "Сервис",
-    },
-  ];
-
+export function About({ cafeName, teamMembers }: AboutProps) {
   const achievements = [
     {
       icon: Award,
@@ -82,7 +41,7 @@ export function About({ isAdminMode: _isAdminMode }: AboutProps) {
       <div className="mb-16 text-center">
         <h2 className="mb-4 text-4xl font-bold text-foreground">О нас</h2>
         <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-          "Бар-да-бар" — это не просто кафе, это место, где встречаются традиции и современность,
+          "{cafeName}" — это не просто кафе, это место, где встречаются традиции и современность,
           где каждая чашка кофе готовится с душой, а каждое блюдо — произведение искусства.
         </p>
       </div>
@@ -102,7 +61,7 @@ export function About({ isAdminMode: _isAdminMode }: AboutProps) {
               постоянно совершенствуем наши рецепты.
             </p>
             <p>
-              Сегодня "Бар-да-бар" — это признанное место встреч для жителей и гостей города, где
+              Сегодня "{cafeName}" — это признанное место встреч для жителей и гостей города, где
               царит атмосфера уюта и гостеприимства.
             </p>
           </div>

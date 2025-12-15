@@ -3,8 +3,9 @@
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon, CheckCircle, Clock, Loader2, Mail, Phone, Users } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
+import { formatPhoneNumber, isValidPhone, isValidEmail } from "../src/utils/formatters";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
@@ -95,15 +96,14 @@ export function TableReservation({
       
       // Если выбранное время уже прошло, сбрасываем его
       if (slotTime <= now) {
-        setFormData(prev => ({ ...prev, time: "" }));
+        setFormData((prev: typeof formData) => ({ ...prev, time: "" }));
       }
     }
   }, [formData.date, formData.time]);
 
   // Вычисляемая валидность полей для UX (aria и disable сабмита)
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = formData.email.trim() === "" || emailRegex.test(formData.email.trim());
-  const isPhoneValid = formData.phone.replace(/\D/g, "").length >= 10;
+  const isEmailValid = isValidEmail(formData.email);
+  const isPhoneValid = isValidPhone(formData.phone);
   const isNameValid = formData.name.trim().length >= 2;
   const isFormValid =
     isNameValid &&
@@ -169,12 +169,11 @@ export function TableReservation({
     const email = formData.email.trim();
 
     if (name.length < 2) validations.push("Укажите имя (не короче 2 символов).");
-    const digits = phone.replace(/\D/g, "");
-    if (digits.length < 10) validations.push("Укажите корректный телефон (не менее 10 цифр).");
+    if (!isValidPhone(phone)) validations.push("Укажите корректный телефон (не менее 10 цифр).");
     if (!formData.date) validations.push("Выберите дату бронирования.");
     if (!formData.time) validations.push("Выберите время бронирования.");
     if (!formData.guests) validations.push("Выберите количество гостей.");
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && !isValidEmail(email)) {
       validations.push("Укажите корректный email или оставьте поле пустым.");
     }
 
@@ -255,7 +254,7 @@ export function TableReservation({
         return;
       }
 
-      let data: any = undefined;
+      let data: { error?: string; message?: string; reservation?: unknown } | undefined = undefined;
       try {
         data = await response.json();
       } catch {
@@ -347,7 +346,7 @@ export function TableReservation({
                 name="name"
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ваше имя"
                 autoComplete="name"
                 inputMode="text"
@@ -370,39 +369,7 @@ export function TableReservation({
                   name="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    let digits = raw.replace(/\D/g, "");
-                    if (!digits) {
-                      setFormData({ ...formData, phone: "" });
-                      return;
-                    }
-                    if (digits.startsWith("8")) {
-                      digits = "7" + digits.slice(1);
-                    }
-                    if (!digits.startsWith("7")) {
-                      digits = digits.startsWith("9") ? "7" + digits : "7" + digits.slice(0, 10);
-                    }
-                    digits = digits.slice(0, 11);
-                    const d = digits.slice(1);
-                    let formatted = "+7";
-                    if (d.length > 0) {
-                      formatted += " (" + d.slice(0, Math.min(3, d.length));
-                      if (d.length >= 3) {
-                        formatted += ")";
-                        if (d.length > 3) {
-                          formatted += " " + d.slice(3, Math.min(6, d.length));
-                          if (d.length > 6) {
-                            formatted += "-" + d.slice(6, Math.min(8, d.length));
-                            if (d.length > 8) {
-                              formatted += "-" + d.slice(8, Math.min(10, d.length));
-                            }
-                          }
-                        }
-                      }
-                    }
-                    setFormData({ ...formData, phone: formatted });
-                  }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })}
                   placeholder="+7 (999) 999-99-99"
                   className="pl-10"
                   autoComplete="tel"
@@ -430,7 +397,7 @@ export function TableReservation({
                 name="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="your@email.com"
                 className="pl-10"
                 autoComplete="email"
@@ -450,7 +417,7 @@ export function TableReservation({
             <div>
               <Label>Дата *</Label>
               <div className="relative">
-                <Popover open={isCalendarOpen} onOpenChange={(open) => {
+                <Popover open={isCalendarOpen} onOpenChange={(open: boolean) => {
                   console.log('Popover onOpenChange called with:', open);
                   setIsCalendarOpen(open);
                 }}>
@@ -463,7 +430,7 @@ export function TableReservation({
                       }`}
                       aria-labelledby="date-label"
                       aria-invalid={!formData.date}
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                         e.preventDefault();
                         console.log('Date button clicked, current state:', isCalendarOpen);
                         const newState = !isCalendarOpen;
@@ -485,7 +452,7 @@ export function TableReservation({
                     <Calendar
                       mode="single"
                       selected={formData.date}
-                      onSelect={(date) => {
+                      onSelect={(date: Date | undefined) => {
                         console.log('Calendar date selected:', date);
                         // Сбрасываем время при изменении даты для пересчета доступных слотов
                         if (formData.time && date) {
@@ -501,7 +468,7 @@ export function TableReservation({
                           const now = new Date();
                           
                           if (slotTime <= now) {
-                            setFormData(prev => ({ ...prev, date, time: "" }));
+                            setFormData((prev: typeof formData) => ({ ...prev, date, time: "" }));
                             setIsCalendarOpen(false);
                             return;
                           }
@@ -510,7 +477,7 @@ export function TableReservation({
                       setFormData({ ...formData, date });
                       setIsCalendarOpen(false);
                     }}
-                    disabled={(date) => {
+                    disabled={(date: Date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
                       return date < today;
@@ -525,7 +492,7 @@ export function TableReservation({
               <Label>Время *</Label>
               <Select
                 value={formData.time}
-                onValueChange={(value) => setFormData({ ...formData, time: value })}
+                onValueChange={(value: string) => setFormData({ ...formData, time: value })}
               >
                 <SelectTrigger id="time" aria-labelledby="time-label" aria-invalid={!formData.time}>
                   <Clock className="mr-2 h-4 w-4" />
@@ -564,7 +531,7 @@ export function TableReservation({
               <Label>Количество гостей *</Label>
               <Select
                 value={formData.guests}
-                onValueChange={(value) => setFormData({ ...formData, guests: value })}
+                onValueChange={(value: string) => setFormData({ ...formData, guests: value })}
               >
                 <SelectTrigger id="guests" aria-labelledby="guests-label" aria-invalid={!formData.guests}>
                   <Users className="mr-2 h-4 w-4" />
@@ -588,7 +555,7 @@ export function TableReservation({
               id="specialRequests"
               name="specialRequests"
               value={formData.specialRequests}
-              onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, specialRequests: e.target.value })}
               placeholder="Особые пожелания, аллергии, предпочтения по размещению..."
               rows={3}
             />

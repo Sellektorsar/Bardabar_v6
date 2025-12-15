@@ -1,11 +1,17 @@
-"'use client'";
+"use client";
 
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
+import type { SiteSettings } from "../src/types";
+import { ContactForm } from "./ContactForm";
 import { TableBooking } from "./TableBooking";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
-export function Contact() {
+interface ContactProps {
+  settings: SiteSettings;
+}
+
+export function Contact({ settings }: ContactProps) {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
@@ -26,7 +32,7 @@ export function Contact() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                г. Москва, ул. Центральная, 123
+                {settings.address}
                 <br />
                 Район: Центральный
                 <br />
@@ -44,7 +50,7 @@ export function Contact() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                +7 (495) 123-45-67
+                {settings.phone}
                 <br />
                 +7 (495) 123-45-68 (для бронирования)
               </p>
@@ -60,7 +66,7 @@ export function Contact() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                info@bar-da-bar.ru
+                {settings.email}
                 <br />
                 booking@bar-da-bar.ru
               </p>
@@ -75,11 +81,7 @@ export function Contact() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-1 text-muted-foreground">
-                <p>Понедельник - Четверг: 09:00 - 23:00</p>
-                <p>Пятница - Суббота: 09:00 - 01:00</p>
-                <p>Воскресенье: 10:00 - 22:00</p>
-              </div>
+              <p className="text-muted-foreground">{settings.workingHours}</p>
             </CardContent>
           </Card>
 
@@ -96,8 +98,9 @@ export function Contact() {
           </Card>
         </div>
 
-        <div>
+        <div className="space-y-6">
           <TableBooking />
+          <ContactForm />
         </div>
       </div>
     </section>

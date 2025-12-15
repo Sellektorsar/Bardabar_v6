@@ -1,0 +1,9 @@
+export { HomePage } from "./HomePage";
+export { MenuPage } from "./MenuPage";
+export { GalleryPage } from "./GalleryPage";
+export { EventsPage } from "./EventsPage";
+export { ReservationPage } from "./ReservationPage";
+export { ReviewsPage } from "./ReviewsPage";
+export { AboutPage } from "./AboutPage";
+export { ContactPage } from "./ContactPage";
+export { AdminPage } from "./AdminPage";

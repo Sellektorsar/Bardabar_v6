@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
-import { Separator } from './ui/separator';
-import { Mail, Settings, CheckCircle, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { AlertCircle, CheckCircle, Mail, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { emailSettingsApi, ProjectPausedError } from "../src/api/client";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Separator } from "./ui/separator";
+import { Switch } from "./ui/switch";
 
 interface EmailSettings {
   enabled: boolean;
@@ -38,28 +40,17 @@ export function EmailSettings() {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const url = `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/email-settings`;
-      
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data.settings);
-        setBackendUnavailable(false);
-      } else {
-        throw new Error('Ошибка загрузки настроек');
+      const data = await emailSettingsApi.get();
+      if (data && typeof data === "object") {
+        setSettings((prev) => ({ ...prev, ...data }));
       }
+      setBackendUnavailable(false);
     } catch (error) {
-      console.log('Ошибка при загрузке настроек email:', error);
+      console.log("Ошибка при загрузке настроек email:", error);
       setBackendUnavailable(true);
-      toast.error('Не удалось загрузить настройки email');
+      if (!(error instanceof ProjectPausedError)) {
+        toast.error("Не удалось загрузить настройки email");
+      }
     } finally {
       setLoading(false);
     }
@@ -69,28 +60,13 @@ export function EmailSettings() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const url = `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/email-settings`;
-      
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify(settings)
-      });
-
-      if (res.ok) {
-        setBackendUnavailable(false);
-        toast.success('Настройки email сохранены!');
-      } else {
-        throw new Error('Ошибка сохранения настроек');
-      }
+      await emailSettingsApi.update(settings);
+      setBackendUnavailable(false);
+      toast.success("Настройки email сохранены!");
     } catch (error) {
-      console.log('Ошибка при сохранении настроек email:', error);
+      console.log("Ошибка при сохранении настроек email:", error);
       setBackendUnavailable(true);
-      toast.error('Не удалось сохранить настройки email');
+      toast.error("Не удалось сохранить настройки email");
     } finally {
       setSaving(false);
     }

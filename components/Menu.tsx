@@ -1,11 +1,7 @@
 "use client";
 
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Badge } from "./ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { MenuCard } from "./cards/MenuCard";
 
-// Добавляем явные типы для элементов меню, чтобы свойство isSpecial стало опциональным
-// и корректно воспринималось в строгом режиме TypeScript
 type MenuItem = {
   name: string;
   description: string;
@@ -358,52 +354,15 @@ export function Menu() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {category.items.map((item, itemIndex) => (
-                <Card
+                <MenuCard
                   key={itemIndex}
-                  className="group border-orange-100 transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                >
-                  <CardHeader className="p-0">
-                    <div className="relative overflow-hidden rounded-t-lg">
-                      <ImageWithFallback
-                        src={item.image}
-                        alt={item.name}
-                        className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      {item.isSpecial && (
-                        <Badge className="absolute right-2 top-2 bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                          Хит
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="p-6">
-                    <div className="mb-2 flex items-start justify-between">
-                      <CardTitle className="text-lg text-foreground">{item.name}</CardTitle>
-                      <span className="text-lg font-bold text-orange-600">{item.price}</span>
-                    </div>
-                    <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-                      {item.description}
-                    </p>
-
-                    {item.allergens && item.allergens.length > 0 && (
-                      <div className="mt-3">
-                        <p className="mb-1 text-xs text-muted-foreground">Аллергены:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {item.allergens.map((allergen, allergenIndex) => (
-                            <Badge
-                              key={allergenIndex}
-                              variant="outline"
-                              className="border-red-200 text-xs text-red-600"
-                            >
-                              {allergen}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                  image={item.image}
+                  allergens={item.allergens}
+                  isSpecial={item.isSpecial}
+                />
               ))}
             </div>
           </div>

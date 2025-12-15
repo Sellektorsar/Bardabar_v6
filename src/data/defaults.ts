@@ -1,0 +1,190 @@
+import type { SiteSettings, MenuItem, Event, TeamMember, Review, GalleryImage } from "../types";
+
+export const defaultSiteSettings: SiteSettings = {
+  cafeName: "Бар-да-бар",
+  phone: "+7 (495) 123-45-67",
+  email: "info@bar-da-bar.ru",
+  address: "г. Москва, ул. Центральная, 123",
+  workingHours: "Пн-Чт: 09:00-23:00, Пт-Сб: 09:00-01:00, Вс: 10:00-22:00",
+  description: "Уютное кафе в самом сердце города, где встречаются традиции и современность.",
+  isOpen: true,
+  acceptsReservations: true,
+};
+
+export const defaultMenuItems: MenuItem[] = [
+  {
+    id: 1,
+    name: "Стейк рибай",
+    description: "Сочный стейк из мраморной говядины с картофелем гриль",
+    price: "1500",
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    category: "Горячие блюда",
+    isSpecial: true,
+    calories: 650,
+    allergens: ["глютен"],
+    isVegetarian: false,
+    isVegan: false,
+  },
+  {
+    id: 2,
+    name: "Паста карбонара",
+    description: "Классическая итальянская паста с беконом и пармезаном",
+    price: "890",
+    image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d292?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    category: "Горячие блюда",
+    isSpecial: false,
+    calories: 520,
+    allergens: ["глютен", "молочные продукты"],
+    isVegetarian: true,
+    isVegan: false,
+  },
+  {
+    id: 3,
+    name: 'Авторский коктейль "Бар-да-бар"',
+    description: "Фирменный коктейль с ромом, фруктовыми соками и мятой",
+    price: "450",
+    image: "https://images.unsplash.com/photo-1536935338788-846bb9981813?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    category: "Напитки",
+    isSpecial: true,
+    calories: 180,
+    allergens: [],
+    isVegetarian: true,
+    isVegan: true,
+  },
+  {
+    id: 4,
+    name: "Салат Цезарь",
+    description: "Свежий салат с курицей гриль, пармезаном и соусом цезарь",
+    price: "650",
+    image: "https://images.unsplash.com/photo-1512852939750-1305098529bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    category: "Салаты",
+    isSpecial: false,
+    calories: 380,
+    allergens: ["молочные продукты"],
+    isVegetarian: false,
+    isVegan: false,
+  },
+  {
+    id: 5,
+    name: "Тирамису",
+    description: "Классический итальянский десерт с маскарпоне и кофе",
+    price: "420",
+    image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    category: "Десерты",
+    isSpecial: false,
+    calories: 450,
+    allergens: ["глютен", "молочные продукты", "яйца"],
+    isVegetarian: true,
+    isVegan: false,
+  },
+];
+
+export const defaultEvents: Event[] = [
+  {
+    id: 1,
+    title: "Живая музыка по пятницам",
+    date: "2025-01-31",
+    time: "19:00",
+    description: "Каждую пятницу в нашем кафе выступают местные музыканты. Джаз, блюз и авторская песня в уютной атмосфере.",
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    type: "Музыка",
+    price: "Бесплатно",
+    isFree: true,
+  },
+  {
+    id: 2,
+    title: "Мастер-класс по приготовлению коктейлей",
+    date: "2025-02-05",
+    time: "18:00",
+    description: "Научитесь готовить авторские коктейли от нашего шеф-бармена.",
+    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    type: "Мастер-класс",
+    price: "1500",
+    isFree: false,
+  },
+];
+
+export const defaultTeamMembers: TeamMember[] = [
+  {
+    id: 1,
+    name: "Алексей Иванов",
+    position: "Шеф-повар",
+    description: "Опытный шеф-повар с 15-летним стажем работы в лучших ресторанах Москвы.",
+    image: "https://images.unsplash.com/photo-1583394293214-28a5b42b6171?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+    speciality: "Авторская кухня",
+  },
+  {
+    id: 2,
+    name: "Мария Петрова",
+    position: "Старший бариста",
+    description: "Мастер кофейного дела, чемпион городских соревнований по латте-арт.",
+    image: "https://images.unsplash.com/photo-1494790108755-2616c8e3e7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+    speciality: "Кофейные напитки",
+  },
+];
+
+export const defaultReviews: Review[] = [
+  {
+    id: 1,
+    name: "Анна Смирнова",
+    rating: 5,
+    comment: "Потрясающая атмосфера и невероятно вкусная еда! Стейк рибай просто тает во рту. Обязательно вернемся!",
+    date: "2025-01-15",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616c8e3e7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+  },
+  {
+    id: 2,
+    name: "Михаил Петров",
+    rating: 5,
+    comment: "Отличный сервис и уютная обстановка. Мастер-класс по коктейлям был фантастическим! Рекомендую всем.",
+    date: "2025-01-10",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+  },
+  {
+    id: 3,
+    name: "Елена Волкова",
+    rating: 4,
+    comment: "Прекрасное место для романтического ужина. Персонал очень внимательный, блюда подаются красиво оформленными.",
+    date: "2025-01-08",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+  },
+];
+
+export const defaultGalleryImages: GalleryImage[] = [
+  {
+    id: 1,
+    url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Интерьер ресторана",
+    category: "interior",
+  },
+  {
+    id: 2,
+    url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Стейк рибай",
+    category: "food",
+  },
+  {
+    id: 3,
+    url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Барная стойка",
+    category: "interior",
+  },
+  {
+    id: 4,
+    url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Живая музыка",
+    category: "events",
+  },
+  {
+    id: 5,
+    url: "https://images.unsplash.com/photo-1621996346565-e3dbc353d292?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Паста карбонара",
+    category: "food",
+  },
+  {
+    id: 6,
+    url: "https://images.unsplash.com/photo-1583394293214-28a5b42b6171?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    alt: "Шеф-повар за работой",
+    category: "team",
+  },
+];
