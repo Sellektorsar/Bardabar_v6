@@ -53,8 +53,9 @@ export function Gallery({ images }: GalleryProps) {
             size="sm"
             onClick={prevImage}
             className="absolute left-4 top-1/2 -translate-y-1/2 transform rounded-full bg-white/80 p-2 text-foreground hover:bg-white"
+            aria-label="Предыдущее изображение"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-6 w-6" aria-hidden="true" />
           </Button>
 
           <Button
@@ -62,8 +63,9 @@ export function Gallery({ images }: GalleryProps) {
             size="sm"
             onClick={nextImage}
             className="absolute right-4 top-1/2 -translate-y-1/2 transform rounded-full bg-white/80 p-2 text-foreground hover:bg-white"
+            aria-label="Следующее изображение"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-6 w-6" aria-hidden="true" />
           </Button>
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform rounded-full bg-black/50 px-3 py-1 text-sm text-white">

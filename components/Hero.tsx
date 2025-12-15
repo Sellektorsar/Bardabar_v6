@@ -2,7 +2,7 @@
 
 import { Clock, Mail, MapPin, Star } from "lucide-react";
 
-import type { SiteSettings, MenuItem, Event, Review } from "../src/types";
+import type { SiteSettings } from "../src/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
 
@@ -24,14 +24,6 @@ interface HeroProps {
   settings: SiteSettings;
   onNavigate: (section: string) => void;
   onShowNewsletter: () => void;
-}
-
-interface PopularContentProps {
-  popularDishes: MenuItem[];
-  upcomingEvents: Event[];
-  recentReviews: Review[];
-  onNavigate: (section: string) => void;
-  onBookEvent: () => void;
 }
 
 export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
@@ -93,6 +85,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-orange-600"
+                  aria-label="Мы ВКонтакте"
                 >
                   <VKIcon className="h-5 w-5" />
                 </Button>
@@ -100,6 +93,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-orange-600"
+                  aria-label="Мы в Telegram"
                 >
                   <TelegramIcon className="h-5 w-5" />
                 </Button>
@@ -125,6 +119,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
         <Button
           onClick={onShowNewsletter}
           className="rounded-full bg-orange-600 p-4 text-white shadow-lg hover:bg-orange-700"
+          aria-label="Подписаться на новости"
         >
           <Mail className="h-5 w-5" />
         </Button>

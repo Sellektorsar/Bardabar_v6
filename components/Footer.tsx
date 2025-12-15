@@ -53,14 +53,16 @@ export function Footer({ settings, onNavClick }: FooterProps) {
               <a
                 href="#"
                 className="rounded-full bg-gray-700 p-2 transition-colors hover:bg-orange-500"
+                aria-label="Мы в ВКонтакте"
               >
-                <VKIcon className="h-5 w-5" />
+                <VKIcon className="h-5 w-5" aria-hidden="true" />
               </a>
               <a
                 href="#"
                 className="rounded-full bg-gray-700 p-2 transition-colors hover:bg-orange-500"
+                aria-label="Мы в Telegram"
               >
-                <TelegramIcon className="h-5 w-5" />
+                <TelegramIcon className="h-5 w-5" aria-hidden="true" />
               </a>
             </div>
           </div>

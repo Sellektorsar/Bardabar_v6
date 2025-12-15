@@ -70,6 +70,7 @@ export function Header({
                   size="sm"
                   onClick={onToggleDarkMode}
                   className="text-muted-foreground"
+                  aria-label={isDarkMode ? "Включить светлую тему" : "Включить тёмную тему"}
                 >
                   {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
@@ -96,6 +97,7 @@ export function Header({
                 size="sm"
                 onClick={onToggleDarkMode}
                 className="text-muted-foreground"
+                aria-label={isDarkMode ? "Включить светлую тему" : "Включить тёмную тему"}
               >
                 {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
@@ -106,6 +108,8 @@ export function Header({
               size="sm"
               className="border-orange-300 text-orange-600"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <MenuIcon className="h-4 w-4" />}
             </Button>
