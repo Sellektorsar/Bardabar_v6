@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, Clock, Mail, MapPin, Sparkles, Star } from "lucide-react";
+import { Clock, Mail, MapPin, Sparkles, Star } from "lucide-react";
 
 import type { SiteSettings } from "../src/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -56,19 +56,19 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
             </div>
 
             {/* Stats */}
-            <div className="animate-slide-up flex flex-wrap gap-6 text-sm" style={{ animationDelay: "0.3s" }}>
-              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+            <div className="animate-slide-up flex flex-wrap gap-4 text-sm" style={{ animationDelay: "0.3s" }}>
+              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
                 <Star className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-foreground">4.8</span>
-                <span className="text-muted-foreground">рейтинг</span>
+                <span className="font-semibold text-orange-600">4.8</span>
+                <span className="text-gray-600 dark:text-gray-300">рейтинг</span>
               </div>
-              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
                 <Clock className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="text-muted-foreground">09:00-23:00</span>
+                <span className="text-gray-600 dark:text-gray-300">09:00-23:00</span>
               </div>
-              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
                 <MapPin className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="text-muted-foreground">Центр города</span>
+                <span className="text-gray-600 dark:text-gray-300">Центр города</span>
               </div>
             </div>
 
@@ -162,11 +162,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
         </Button>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex">
-        <span className="text-xs text-muted-foreground">Листайте вниз</span>
-        <ArrowDown className="scroll-indicator h-5 w-5 text-orange-500" />
-      </div>
+
     </section>
   );
 }
