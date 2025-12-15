@@ -138,6 +138,16 @@
 - [x] UI/UX аудит: добавлены aria-label к кнопкам в Header, Footer, Gallery, Hero
 - [x] Удалён неиспользуемый интерфейс PopularContentProps из Hero.tsx
 - [x] NewsletterModal: добавлены role="dialog", aria-modal, aria-labelledby, улучшена валидация email
+- [x] Дизайн: добавлены CSS анимации (float, pulse-glow, shimmer, bounce-subtle, scale-in, slide-up, wiggle)
+- [x] Дизайн: glassmorphism эффект, gradient-text-animated, hover-lift, underline-animation
+- [x] Компонент AnimatedCounter — анимированный счётчик при появлении в viewport
+- [x] Компонент ScrollReveal — плавное появление элементов при скролле
+- [x] Компонент ParallaxSection — параллакс эффект для секций
+- [x] Hero: полный редизайн с анимациями, floating badge, scroll indicator
+- [x] MenuCard: hover эффекты, gradient overlay, 3D tilt
+- [x] Reviews: stagger анимации, анимированные счётчики статистики
+- [x] About: ScrollReveal для секций, анимированные достижения
+- [x] Footer: animated background blobs, gradient text, hover эффекты
 
 ---
 
