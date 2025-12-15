@@ -29,7 +29,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-orange-200 bg-white/95 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95">
+    <header className="sticky top-0 z-50 border-b border-orange-200/50 bg-white/90 shadow-md backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/95">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div

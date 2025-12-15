@@ -16,7 +16,7 @@
   --text-4xl: 2.25rem;
   --text-5xl: 3rem;
   --text-6xl: 3.75rem;
-  --background: #ffffff;
+  --background: #fffbf7;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
@@ -99,6 +99,15 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      radial-gradient(ellipse at top left, rgba(251, 146, 60, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(239, 68, 68, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at center, rgba(251, 191, 36, 0.04) 0%, transparent 70%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image: none;
   }
 }
 
@@ -336,4 +345,65 @@ html {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   opacity: 0.03;
   pointer-events: none;
+}
+
+/* Light theme enhancements */
+.light-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fff8f3 100%);
+  border: 1px solid rgba(251, 146, 60, 0.15);
+}
+
+/* Warm shadow for light theme */
+.warm-shadow {
+  box-shadow: 
+    0 4px 6px -1px rgba(251, 146, 60, 0.1),
+    0 2px 4px -2px rgba(251, 146, 60, 0.1);
+}
+
+.warm-shadow:hover {
+  box-shadow: 
+    0 10px 15px -3px rgba(251, 146, 60, 0.15),
+    0 4px 6px -4px rgba(251, 146, 60, 0.1);
+}
+
+/* Subtle pattern background */
+.pattern-bg {
+  background-color: #fffbf7;
+  background-image: 
+    radial-gradient(circle at 25px 25px, rgba(251, 146, 60, 0.03) 2%, transparent 0%),
+    radial-gradient(circle at 75px 75px, rgba(239, 68, 68, 0.02) 2%, transparent 0%);
+  background-size: 100px 100px;
+}
+
+.dark .pattern-bg {
+  background-color: transparent;
+  background-image: none;
+}
+
+/* Gradient border effect */
+.gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #f97316, #ef4444, #f97316);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.dark .gradient-border::before {
+  opacity: 0.3;
+}
+
+/* Section divider with gradient */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.3), transparent);
+  margin: 2rem 0;
 }
