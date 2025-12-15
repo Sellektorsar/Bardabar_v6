@@ -137,6 +137,7 @@
 - [x] Создана интеграция с Sentry (src/utils/sentry.ts)
 - [x] UI/UX аудит: добавлены aria-label к кнопкам в Header, Footer, Gallery, Hero
 - [x] Удалён неиспользуемый интерфейс PopularContentProps из Hero.tsx
+- [x] NewsletterModal: добавлены role="dialog", aria-modal, aria-labelledby, улучшена валидация email
 
 ---
 
