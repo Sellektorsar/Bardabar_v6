@@ -68,8 +68,10 @@ export function Reviews({ reviews }: ReviewsProps) {
               </div>
             </CardContent>
             
-            {/* Decorative gradient */}
-            <div className="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 transition-all duration-500 group-hover:scale-150" />
+            {/* Decorative gradient - contained */}
+            <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 overflow-hidden">
+              <div className="absolute -right-10 -top-10 h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 transition-all duration-500 group-hover:scale-150" />
+            </div>
           </Card>
         ))}
       </div>

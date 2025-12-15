@@ -144,9 +144,9 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
               </div>
             </div>
 
-            {/* Decorative elements */}
-            <div className="absolute -right-4 -top-4 h-24 w-24 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-orange-400 to-red-400 opacity-80" />
-            <div className="absolute -bottom-4 -left-4 h-20 w-20 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-red-400 to-orange-400 opacity-60" style={{ animationDelay: "1s" }} />
+            {/* Decorative elements - hidden on mobile to prevent overflow */}
+            <div className="absolute -right-4 -top-4 hidden h-24 w-24 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-orange-400 to-red-400 opacity-80 md:block" />
+            <div className="absolute -bottom-4 -left-4 hidden h-20 w-20 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-red-400 to-orange-400 opacity-60 md:block" style={{ animationDelay: "1s" }} />
           </div>
         </div>
       </div>

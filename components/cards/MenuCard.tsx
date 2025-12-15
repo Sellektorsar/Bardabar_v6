@@ -44,9 +44,9 @@ export const MenuCard = memo(function MenuCard({
             </Badge>
           )}
           
-          {/* Price badge on hover */}
-          <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <span className="rounded-full bg-white/90 px-3 py-1 text-lg font-bold text-orange-600 shadow-lg backdrop-blur-sm">
+          {/* Price badge on hover - visible on image */}
+          <div className="absolute bottom-3 left-3 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <span className="rounded-full bg-white/95 px-4 py-2 text-lg font-bold text-orange-600 shadow-lg backdrop-blur-sm">
               {price}
             </span>
           </div>
@@ -78,8 +78,10 @@ export const MenuCard = memo(function MenuCard({
         )}
       </CardContent>
       
-      {/* Decorative corner */}
-      <div className="absolute -right-8 -top-8 h-16 w-16 rotate-45 bg-gradient-to-br from-orange-500/10 to-red-500/10 transition-all duration-300 group-hover:scale-150" />
+      {/* Decorative corner - contained within card */}
+      <div className="pointer-events-none absolute right-0 top-0 h-16 w-16 overflow-hidden">
+        <div className="absolute -right-8 -top-8 h-16 w-16 rotate-45 bg-gradient-to-br from-orange-500/10 to-red-500/10 transition-all duration-300 group-hover:scale-150" />
+      </div>
     </Card>
   );
 });
