@@ -38,8 +38,8 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="space-y-8">
             {/* Badge */}
-            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
-              <Sparkles className="h-4 w-4 animate-pulse" />
+            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border-2 border-orange-400 bg-white px-4 py-2 text-sm font-medium text-orange-600 shadow-md dark:border-orange-600 dark:bg-gray-900 dark:text-orange-400">
+              <Sparkles className="h-4 w-4 animate-pulse text-orange-500" />
               <span>Лучшее место в городе</span>
             </div>
 
