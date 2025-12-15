@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Mail, MapPin, Star } from "lucide-react";
+import { ArrowDown, Clock, Mail, MapPin, Sparkles, Star } from "lucide-react";
 
 import type { SiteSettings } from "../src/types";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -28,63 +28,78 @@ interface HeroProps {
 
 export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
   return (
-    <section className="relative overflow-hidden">
-      <div className="container mx-auto px-4 py-16">
+    <section className="relative min-h-[90vh] overflow-hidden">
+      {/* Animated background blobs */}
+      <div className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] animate-float rounded-full bg-gradient-to-bl from-orange-200/40 to-transparent blur-3xl" />
+      <div className="absolute bottom-0 left-0 -z-10 h-[400px] w-[400px] animate-float rounded-full bg-gradient-to-tr from-red-200/40 to-transparent blur-3xl" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute left-1/2 top-1/3 -z-10 h-[300px] w-[300px] animate-float rounded-full bg-gradient-to-r from-orange-300/20 to-red-300/20 blur-3xl" style={{ animationDelay: "3s" }} />
+
+      <div className="container mx-auto px-4 py-16 lg:py-24">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div className="animate-fade-in space-y-8">
+          <div className="space-y-8">
+            {/* Badge */}
+            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+              <Sparkles className="h-4 w-4 animate-pulse" />
+              <span>Лучшее место в городе</span>
+            </div>
+
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold leading-tight text-foreground md:text-6xl">
+              <h1 className="animate-slide-up text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl" style={{ animationDelay: "0.1s" }}>
                 Добро пожаловать в
-                <span className="block bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                <span className="gradient-text-animated mt-2 block">
                   {settings.cafeName}
                 </span>
               </h1>
-              <p className="text-xl leading-relaxed text-muted-foreground">
+              <p className="animate-slide-up max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl" style={{ animationDelay: "0.2s" }}>
                 {settings.description}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-orange-500" />
-                <span>4.8 рейтинг</span>
+            {/* Stats */}
+            <div className="animate-slide-up flex flex-wrap gap-6 text-sm" style={{ animationDelay: "0.3s" }}>
+              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+                <Star className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
+                <span className="font-medium text-foreground">4.8</span>
+                <span className="text-muted-foreground">рейтинг</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-orange-500" />
-                <span>Работаем 09:00-23:00</span>
+              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+                <Clock className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
+                <span className="text-muted-foreground">09:00-23:00</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-orange-500" />
-                <span>Центр города</span>
+              <div className="group flex items-center gap-2 rounded-lg bg-white/50 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-gray-800/50 dark:hover:bg-gray-800">
+                <MapPin className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
+                <span className="text-muted-foreground">Центр города</span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 sm:flex-row">
+            {/* CTA Buttons */}
+            <div className="animate-slide-up flex flex-col gap-4 sm:flex-row" style={{ animationDelay: "0.4s" }}>
               <Button
                 size="lg"
                 onClick={() => onNavigate("menu")}
-                className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-3 text-white shadow-lg transition-all duration-300 hover:from-orange-600 hover:to-red-600 hover:shadow-xl"
+                className="glow-on-hover group relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-6 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-xl"
               >
-                Посмотреть меню
+                <span className="relative z-10">Посмотреть меню</span>
+                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 transition-opacity group-hover:opacity-100" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => onNavigate("reservation")}
-                className="rounded-xl border-orange-300 px-8 py-3 text-orange-600 transition-all duration-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="group rounded-xl border-2 border-orange-300 px-8 py-6 text-lg font-semibold text-orange-600 transition-all duration-300 hover:scale-105 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
               >
-                Забронировать столик
+                <span className="underline-animation">Забронировать столик</span>
               </Button>
             </div>
 
             {/* Social Media Links */}
-            <div className="flex items-center space-x-4 pt-4">
+            <div className="animate-slide-up flex items-center space-x-4 pt-4" style={{ animationDelay: "0.5s" }}>
               <span className="text-sm text-muted-foreground">Мы в соцсетях:</span>
-              <div className="flex space-x-3">
+              <div className="flex space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-orange-600"
+                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/30"
                   aria-label="Мы ВКонтакте"
                 >
                   <VKIcon className="h-5 w-5" />
@@ -92,7 +107,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-orange-600"
+                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/30"
                   aria-label="Мы в Telegram"
                 >
                   <TelegramIcon className="h-5 w-5" />
@@ -101,32 +116,57 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="relative z-10 rotate-3 transform overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 hover:rotate-0">
+          {/* Hero Image */}
+          <div className="relative animate-scale-in">
+            {/* Main image with 3D effect */}
+            <div className="card-3d relative z-10 overflow-hidden rounded-3xl shadow-2xl">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
                 alt={`Интерьер кафе ${settings.cafeName}`}
-                className="h-96 w-full object-cover"
+                className="h-[400px] w-full object-cover lg:h-[500px]"
               />
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+              
+              {/* Floating badge */}
+              <div className="absolute bottom-6 left-6 animate-float rounded-xl bg-white/90 px-4 py-3 shadow-lg backdrop-blur-sm dark:bg-gray-900/90">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    <div className="h-8 w-8 rounded-full bg-orange-400" />
+                    <div className="h-8 w-8 rounded-full bg-red-400" />
+                    <div className="h-8 w-8 rounded-full bg-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">500+ гостей</p>
+                    <p className="text-xs text-muted-foreground">в месяц</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="absolute inset-0 scale-105 transform rounded-2xl bg-gradient-to-br from-orange-400/20 to-red-400/20 blur-xl" />
+
+            {/* Decorative elements */}
+            <div className="absolute -right-4 -top-4 h-24 w-24 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-orange-400 to-red-400 opacity-80" />
+            <div className="absolute -bottom-4 -left-4 h-20 w-20 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-red-400 to-orange-400 opacity-60" style={{ animationDelay: "1s" }} />
           </div>
         </div>
       </div>
 
-      {/* Newsletter CTA */}
+      {/* Newsletter CTA - floating */}
       <div className="absolute bottom-8 right-8 z-20">
         <Button
           onClick={onShowNewsletter}
-          className="rounded-full bg-orange-600 p-4 text-white shadow-lg hover:bg-orange-700"
+          className="animate-pulse-glow rounded-full bg-orange-600 p-4 text-white shadow-lg transition-transform hover:scale-110 hover:bg-orange-700"
           aria-label="Подписаться на новости"
         >
           <Mail className="h-5 w-5" />
         </Button>
       </div>
 
-      <div className="absolute right-0 top-0 -z-10 h-96 w-96 rounded-full bg-gradient-to-bl from-orange-200/50 to-transparent blur-3xl" />
-      <div className="absolute bottom-0 left-0 -z-10 h-96 w-96 rounded-full bg-gradient-to-tr from-red-200/50 to-transparent blur-3xl" />
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex">
+        <span className="text-xs text-muted-foreground">Листайте вниз</span>
+        <ArrowDown className="scroll-indicator h-5 w-5 text-orange-500" />
+      </div>
     </section>
   );
 }

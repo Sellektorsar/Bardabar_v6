@@ -37,32 +37,36 @@ export function Footer({ settings, onNavClick }: FooterProps) {
   };
 
   return (
-    <footer className="border-t border-orange-200 bg-gradient-to-br from-gray-900 to-gray-800 py-16 text-white dark:border-gray-700">
-      <div className="container mx-auto px-4">
+    <footer className="relative overflow-hidden border-t border-orange-200 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 text-white dark:border-gray-700">
+      {/* Animated background elements */}
+      <div className="absolute left-0 top-0 h-64 w-64 animate-float rounded-full bg-orange-500/5 blur-3xl" />
+      <div className="absolute bottom-0 right-0 h-64 w-64 animate-float rounded-full bg-red-500/5 blur-3xl" style={{ animationDelay: "2s" }} />
+      
+      <div className="container relative mx-auto px-4">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500">
-                <span className="text-lg font-bold text-white">Б</span>
+            <div className="group flex items-center space-x-2">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 shadow-lg transition-transform group-hover:scale-110">
+                <span className="text-xl font-bold text-white">Б</span>
               </div>
-              <span className="text-2xl font-bold">{settings.cafeName}</span>
+              <span className="gradient-text-animated text-2xl font-bold">{settings.cafeName}</span>
             </div>
             <p className="text-gray-400">{settings.description}</p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <a
                 href="#"
-                className="rounded-full bg-gray-700 p-2 transition-colors hover:bg-orange-500"
+                className="group rounded-full bg-gray-700/50 p-3 backdrop-blur-sm transition-all hover:scale-110 hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-500/25"
                 aria-label="Мы в ВКонтакте"
               >
-                <VKIcon className="h-5 w-5" aria-hidden="true" />
+                <VKIcon className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
               </a>
               <a
                 href="#"
-                className="rounded-full bg-gray-700 p-2 transition-colors hover:bg-orange-500"
+                className="group rounded-full bg-gray-700/50 p-3 backdrop-blur-sm transition-all hover:scale-110 hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-500/25"
                 aria-label="Мы в Telegram"
               >
-                <TelegramIcon className="h-5 w-5" aria-hidden="true" />
+                <TelegramIcon className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -80,7 +84,7 @@ export function Footer({ settings, onNavClick }: FooterProps) {
                 <li key={item.id}>
                   <button
                     onClick={() => onNavClick(item.id)}
-                    className="text-gray-400 transition-colors hover:text-orange-400"
+                    className="underline-animation text-gray-400 transition-colors hover:text-orange-400"
                   >
                     {item.label}
                   </button>
@@ -123,6 +127,9 @@ export function Footer({ settings, onNavClick }: FooterProps) {
 
         <div className="mt-12 border-t border-gray-700 pt-8 text-center text-gray-400">
           <p>© {new Date().getFullYear()} {settings.cafeName}. Все права защищены.</p>
+          <p className="mt-2 text-sm text-gray-500">
+            Сделано с <span className="animate-pulse text-red-500">❤</span> для наших гостей
+          </p>
         </div>
       </div>
     </footer>
