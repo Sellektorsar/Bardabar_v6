@@ -125,28 +125,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                 alt={`Интерьер кафе ${settings.cafeName}`}
                 className="h-[400px] w-full object-cover lg:h-[500px]"
               />
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-              
-              {/* Floating badge */}
-              <div className="absolute bottom-6 left-6 animate-float rounded-xl bg-white/90 px-4 py-3 shadow-lg backdrop-blur-sm dark:bg-gray-900/90">
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2">
-                    <div className="h-8 w-8 rounded-full bg-orange-400" />
-                    <div className="h-8 w-8 rounded-full bg-red-400" />
-                    <div className="h-8 w-8 rounded-full bg-orange-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">500+ гостей</p>
-                    <p className="text-xs text-muted-foreground">в месяц</p>
-                  </div>
-                </div>
-              </div>
             </div>
-
-            {/* Decorative elements - hidden on mobile to prevent overflow */}
-            <div className="absolute -right-4 -top-4 hidden h-24 w-24 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-orange-400 to-red-400 opacity-80 md:block" />
-            <div className="absolute -bottom-4 -left-4 hidden h-20 w-20 animate-bounce-subtle rounded-2xl bg-gradient-to-br from-red-400 to-orange-400 opacity-60 md:block" style={{ animationDelay: "1s" }} />
           </div>
         </div>
       </div>
