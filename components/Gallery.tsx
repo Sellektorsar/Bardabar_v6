@@ -33,7 +33,7 @@ export function Gallery({ images }: GalleryProps) {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
-        <h2 className="mb-4 text-4xl font-bold text-foreground">Галерея</h2>
+        <h2 className="gradient-text-animated mb-4 text-4xl font-bold">Галерея</h2>
         <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
           Окунитесь в атмосферу нашего ресторана
         </p>
@@ -82,7 +82,7 @@ export function Gallery({ images }: GalleryProps) {
             onClick={() => setCurrentIndex(index)}
             className={`relative h-20 overflow-hidden rounded-lg transition-all duration-200 md:h-24 ${
               index === currentIndex
-                ? "scale-105 ring-2 ring-orange-500"
+                ? "scale-105 ring-2 ring-amber-400"
                 : "opacity-70 hover:scale-105 hover:opacity-100"
             }`}
           >
@@ -98,8 +98,8 @@ export function Gallery({ images }: GalleryProps) {
       {/* Gallery Categories */}
       <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
         {categories.map(({ category, title, icon: Icon }) => (
-          <Card key={category} className="p-6 text-center transition-shadow hover:shadow-lg">
-            <Icon className="mx-auto mb-3 h-8 w-8 text-orange-600" />
+          <Card key={category} className="loft-card p-6 text-center">
+            <Icon className="mx-auto mb-3 h-8 w-8 text-amber-400" />
             <h3 className="mb-2 font-semibold text-foreground">{title}</h3>
             <p className="text-sm text-muted-foreground">
               {images.filter((img) => img.category === category).length} фото

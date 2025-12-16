@@ -6,7 +6,7 @@ import { CalendarIcon, CheckCircle, Clock, Loader2, Mail, Phone, Users } from "l
 import React, { useState, useEffect } from "react";
 
 import { formatPhoneNumber, isValidPhone, isValidEmail } from "../src/utils/formatters";
-import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { supabase } from "../src/lib/supabase";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -15,49 +15,6 @@ import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
-
-// Утилиты для унифицированного graceful fallback
-const PAUSED_TEXT_REGEX = /project\s*paused/i;
-const NETWORK_CORS_REGEX =
-  /(Failed to fetch|NetworkError|CORS|TypeError: Failed to fetch|TypeError: Load failed|ERR_NETWORK|ERR_BLOCKED_BY_CLIENT)/i;
-const isPausedMessage = (text?: string) => !!text && PAUSED_TEXT_REGEX.test(text);
-const logPaused = (context: string) =>
-  console.log(`${context}: проект приостановлен, включаем демо-режим`);
-
-// Добавляем локальное сохранение бронирований в демо-режиме
-const saveDemoTableReservation = (payload: {
-  name: string;
-  phone: string;
-  email: string;
-  date?: Date | undefined;
-  time: string;
-  guests: string;
-  specialRequests: string;
-}) => {
-  try {
-    const existing = JSON.parse(localStorage.getItem("demo_bookings") || "[]");
-    const id = `demo-table-${Date.now()}`;
-    const guestsNum =
-      payload.guests === "10+" ? 10 : parseInt(payload.guests || "0", 10) || undefined;
-    const demoItem = {
-      id,
-      type: "table" as const,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      name: payload.name,
-      phone: payload.phone,
-      email: payload.email,
-      date: payload.date ? format(payload.date, "yyyy-MM-dd") : undefined,
-      time: payload.time,
-      guests: guestsNum,
-      specialRequests: payload.specialRequests || "",
-    };
-    localStorage.setItem("demo_bookings", JSON.stringify([demoItem, ...existing]));
-    return id;
-  } catch {
-    return null;
-  }
-};
 
 export function TableReservation({
   acceptsReservations = true,
@@ -76,7 +33,6 @@ export function TableReservation({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [isProjectPaused, setIsProjectPaused] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Автоматический сброс времени, если оно стало недоступным после изменения даты
@@ -218,70 +174,35 @@ export function TableReservation({
     setError("");
 
     try {
-      const response = await fetch(
-        `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/reservations`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify({
-            ...formData,
-            date: formData.date ? format(formData.date, "yyyy-MM-dd") : null,
-          }),
-        },
-      );
+      // Записываем напрямую в таблицу bookings через Supabase client
+      const guestsNum = formData.guests === "10+" ? 10 : parseInt(formData.guests || "0", 10);
+      
+      const { data, error: insertError } = await supabase
+        .from("bookings")
+        .insert({
+          name: name,
+          phone: phone,
+          email: email || null,
+          date: formData.date ? format(formData.date, "yyyy-MM-dd") : null,
+          time: formData.time,
+          guests: guestsNum,
+          special_requests: formData.specialRequests || null,
+          type: "table",
+          status: "pending",
+        })
+        .select()
+        .single();
 
-      // Graceful fallback: статус 540 или текстовое тело с признаком "Project paused"
-      if (response.status === 540) {
-        setIsProjectPaused(true);
-        saveDemoTableReservation(formData);
-        setSubmitted(true);
-        logPaused("Бронирование (540)");
-        return;
-      }
-
-      const textBody = await response
-        .clone()
-        .text()
-        .catch(() => "");
-      if (isPausedMessage(textBody)) {
-        setIsProjectPaused(true);
-        saveDemoTableReservation(formData);
-        setSubmitted(true);
-        logPaused("Бронирование (text)");
-        return;
-      }
-
-      let data: { error?: string; message?: string; reservation?: unknown } | undefined = undefined;
-      try {
-        data = await response.json();
-      } catch {
-        // Ответ не JSON — полагаемся на статус и текст
-      }
-
-      if (!response.ok) {
-        const serverMsg = data?.error || data?.message || textBody;
-        throw new Error(serverMsg || "Ошибка при создании бронирования");
+      if (insertError) {
+        throw new Error(insertError.message);
       }
 
       setSubmitted(true);
-      console.log("Бронирование создано:", data?.reservation ?? null);
+      console.log("Бронирование создано:", data);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error("Ошибка бронирования:", message);
-
-      // Сетевые/CORS ошибки или текстовый признак паузы — переходим в демо-режим
-      if (NETWORK_CORS_REGEX.test(message) || isPausedMessage(message)) {
-        setIsProjectPaused(true);
-        saveDemoTableReservation(formData);
-        setSubmitted(true);
-        setError("");
-        logPaused("Бронирование (network/CORS)");
-      } else {
-        setError(message || "Произошла ошибка");
-      }
+      setError(message || "Произошла ошибка при создании бронирования");
     } finally {
       setIsSubmitting(false);
     }
@@ -293,17 +214,14 @@ export function TableReservation({
         <CardContent className="p-8 text-center">
           <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-500" />
           <h3 className="mb-2 text-2xl font-bold text-foreground">
-            {isProjectPaused ? "Демо-режим" : "Бронирование отправлено!"}
+            Бронирование отправлено!
           </h3>
           <p className="mb-4 text-muted-foreground">
-            {isProjectPaused
-              ? "Система временно работает в демо-режиме. Ваш запрос сохранен локально для демонстрации функций."
-              : "Спасибо за ваш запрос. Мы свяжемся с вами в ближайшее время для подтверждения бронирования."}
+            Спасибо за ваш запрос. Мы свяжемся с вами в ближайшее время для подтверждения бронирования.
           </p>
           <Button
             onClick={() => {
               setSubmitted(false);
-              setIsProjectPaused(false);
               setFormData({
                 name: "",
                 phone: "",

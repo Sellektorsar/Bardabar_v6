@@ -32,7 +32,7 @@ export function Events() {
       description:
         "Каждую пятницу в нашем кафе выступают местные музыканты. Джаз, блюз и авторская песня в уютной атмосфере.",
       image:
-        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        "https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/events-3.jpg",
       type: "Музыка",
       capacity: "50 человек",
       price: "Бесплатно",
@@ -47,7 +47,7 @@ export function Events() {
       description:
         "Научитесь готовить авторские коктейли от нашего шеф-бармена. В стоимость включены все ингредиенты.",
       image:
-        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        "https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/events-2.jpg",
       type: "Мастер-класс",
       capacity: "15 человек",
       price: "1500 ₽",
@@ -62,7 +62,7 @@ export function Events() {
       description:
         "Романтический вечер для влюбленных. Специальное меню, живая музыка и особая атмосфера.",
       image:
-        "https://images.unsplash.com/photo-1518136247453-74e7b5265980?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        "https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/events-4.jpg",
       type: "Праздник",
       capacity: "30 пар",
       price: "2500 ₽",
@@ -77,7 +77,7 @@ export function Events() {
       description:
         "Готовим фирменные блюда под руководством шеф-повара. Все приготовленное можно забрать домой.",
       image:
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        "https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/events-5.jpg",
       type: "Кулинария",
       capacity: "12 человек",
       price: "2000 ₽",
@@ -122,7 +122,7 @@ export function Events() {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mb-12 text-center">
-        <h2 className="mb-4 text-4xl font-bold text-foreground">Мероприятия</h2>
+        <h2 className="gradient-text-animated mb-4 text-4xl font-bold">Мероприятия</h2>
         <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
           Узнайте о предстоящих событиях и специальных предложениях в нашем кафе
         </p>
@@ -138,7 +138,7 @@ export function Events() {
           return (
             <Card
               key={event.id}
-              className="group border-orange-100 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              className="loft-card group transition-all duration-300 hover:scale-105"
             >
               <CardHeader className="p-0">
                 <div className="relative overflow-hidden rounded-t-lg">
@@ -173,31 +173,31 @@ export function Events() {
 
                   <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-orange-500" />
+                      <Calendar className="h-4 w-4 text-amber-400" />
                       <span>{formatDate(event.date)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-orange-500" />
+                      <Clock className="h-4 w-4 text-amber-400" />
                       <span>{event.time}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-orange-500" />
+                      <Users className="h-4 w-4 text-amber-400" />
                       <span>{event.capacity}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-orange-500" />
+                      <MapPin className="h-4 w-4 text-amber-400" />
                       <span>Наше кафе</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div className="text-lg font-bold text-orange-600">{event.price}</div>
+                  <div className="flex items-center justify-between border-t border-amber-500/20 pt-4">
+                    <div className="text-lg font-bold text-amber-400">{event.price}</div>
                     <EventBooking
                       event={normalizeEvent(event)}
                       trigger={
                         <Button
                           size="sm"
-                          className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+                          className="btn-loft"
                         >
                           <Ticket className="mr-2 h-4 w-4" />
                           Забронировать
@@ -212,7 +212,7 @@ export function Events() {
         })}
       </div>
 
-      <div className="mt-16 rounded-2xl bg-gradient-to-r from-orange-50 to-red-50 p-8">
+      <div className="loft-card mt-16 rounded-2xl p-8">
         <div className="text-center">
           <h3 className="mb-4 text-2xl font-bold text-foreground">
             Хотите провести свое мероприятие?
@@ -227,7 +227,7 @@ export function Events() {
                 "Свяжитесь с нами по телефону +7 (495) 123-45-67 для обсуждения вашего мероприятия!",
               )
             }
-            className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-3 text-white shadow-lg transition-all duration-300 hover:from-orange-600 hover:to-red-600 hover:shadow-xl"
+            className="btn-loft rounded-xl px-8 py-3 shadow-lg transition-all duration-300"
           >
             Обсудить мероприятие
           </Button>

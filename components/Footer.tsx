@@ -37,33 +37,33 @@ export function Footer({ settings, onNavClick }: FooterProps) {
   };
 
   return (
-    <footer className="relative overflow-hidden border-t border-orange-200 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 text-white dark:border-gray-700">
-      {/* Animated background elements */}
-      <div className="absolute left-0 top-0 h-64 w-64 animate-float rounded-full bg-orange-500/5 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-64 w-64 animate-float rounded-full bg-red-500/5 blur-3xl" style={{ animationDelay: "2s" }} />
+    <footer className="loft-texture relative overflow-hidden border-t border-amber-500/20 bg-card py-16 text-foreground">
+      {/* Warm ambient glow */}
+      <div className="absolute left-0 top-0 h-64 w-64 animate-float rounded-full bg-amber-500/10 blur-3xl" />
+      <div className="absolute bottom-0 right-0 h-64 w-64 animate-float rounded-full bg-red-600/10 blur-3xl" style={{ animationDelay: "2s" }} />
       
       <div className="container relative mx-auto px-4">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
             <div className="group flex items-center space-x-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 shadow-lg transition-transform group-hover:scale-110">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-red-600 shadow-lg shadow-amber-500/25 transition-transform group-hover:scale-110">
                 <span className="text-xl font-bold text-white">Б</span>
               </div>
               <span className="gradient-text-animated text-2xl font-bold">{settings.cafeName}</span>
             </div>
-            <p className="text-gray-400">{settings.description}</p>
+            <p className="text-muted-foreground">{settings.description}</p>
             <div className="flex space-x-3">
               <a
                 href="#"
-                className="group rounded-full bg-gray-700/50 p-3 backdrop-blur-sm transition-all hover:scale-110 hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-500/25"
+                className="group rounded-full bg-secondary p-3 transition-all hover:scale-110 hover:bg-amber-500 hover:shadow-lg hover:shadow-amber-500/25"
                 aria-label="Мы в ВКонтакте"
               >
                 <VKIcon className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
               </a>
               <a
                 href="#"
-                className="group rounded-full bg-gray-700/50 p-3 backdrop-blur-sm transition-all hover:scale-110 hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-500/25"
+                className="group rounded-full bg-secondary p-3 transition-all hover:scale-110 hover:bg-amber-500 hover:shadow-lg hover:shadow-amber-500/25"
                 aria-label="Мы в Telegram"
               >
                 <TelegramIcon className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
@@ -73,7 +73,7 @@ export function Footer({ settings, onNavClick }: FooterProps) {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Быстрые ссылки</h3>
+            <h3 className="text-lg font-bold text-foreground">Быстрые ссылки</h3>
             <ul className="space-y-2">
               {[
                 { id: "menu", label: "Меню" },
@@ -84,7 +84,7 @@ export function Footer({ settings, onNavClick }: FooterProps) {
                 <li key={item.id}>
                   <button
                     onClick={() => onNavClick(item.id)}
-                    className="underline-animation text-gray-400 transition-colors hover:text-orange-400"
+                    className="text-muted-foreground transition-colors hover:text-amber-400"
                   >
                     {item.label}
                   </button>
@@ -95,21 +95,21 @@ export function Footer({ settings, onNavClick }: FooterProps) {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Контакты</h3>
+            <h3 className="text-lg font-bold text-foreground">Контакты</h3>
             <ul className="space-y-3">
-              <li className="flex items-center gap-3 text-gray-400">
-                <Phone className="h-4 w-4 text-orange-500" />
+              <li className="flex items-center gap-3 text-muted-foreground">
+                <Phone className="h-4 w-4 text-amber-400" />
                 <span>{settings.phone}</span>
               </li>
-              <li className="flex items-center gap-3 text-gray-400">
-                <Mail className="h-4 w-4 text-orange-500" />
+              <li className="flex items-center gap-3 text-muted-foreground">
+                <Mail className="h-4 w-4 text-amber-400" />
                 <span>{settings.email}</span>
               </li>
               <li
-                className="flex cursor-pointer items-start gap-3 text-gray-400 transition-colors hover:text-orange-400"
+                className="flex cursor-pointer items-start gap-3 text-muted-foreground transition-colors hover:text-amber-400"
                 onClick={handleOpenMap}
               >
-                <MapPin className="mt-1 h-4 w-4 flex-shrink-0 text-orange-500" />
+                <MapPin className="mt-1 h-4 w-4 flex-shrink-0 text-amber-400" />
                 <span>{settings.address}</span>
               </li>
             </ul>
@@ -117,17 +117,17 @@ export function Footer({ settings, onNavClick }: FooterProps) {
 
           {/* Working Hours */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Часы работы</h3>
-            <div className="flex items-start gap-3 text-gray-400">
-              <Clock className="mt-1 h-4 w-4 flex-shrink-0 text-orange-500" />
+            <h3 className="text-lg font-bold text-foreground">Часы работы</h3>
+            <div className="flex items-start gap-3 text-muted-foreground">
+              <Clock className="mt-1 h-4 w-4 flex-shrink-0 text-amber-400" />
               <div className="whitespace-pre-line">{settings.workingHours.replace(/, /g, "\n")}</div>
             </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-gray-700 pt-8 text-center text-gray-400">
+        <div className="mt-12 border-t border-amber-500/20 pt-8 text-center text-muted-foreground">
           <p>© {new Date().getFullYear()} {settings.cafeName}. Все права защищены.</p>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted-foreground/70">
             Сделано с <span className="animate-pulse text-red-500">❤</span> для наших гостей
           </p>
         </div>

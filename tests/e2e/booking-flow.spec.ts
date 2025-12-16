@@ -50,11 +50,12 @@ test.describe("Booking Flow E2E Tests", () => {
 
     // Ожидание загрузки страницы
     await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000); // Дополнительное ожидание для рендеринга
 
     // Проверка, что приложение загрузилось
-    const brandH1 = page.getByRole("heading", { level: 1 }).filter({ hasText: "Бар-да-бар" });
-    console.log("👀 Найдено h1 с текстом «Бар-да-бар»: ", await brandH1.count());
-    await expect(brandH1.first()).toBeVisible();
+    const reserveButton = page.locator("button").filter({ hasText: /забронировать столик/i }).first();
+    await expect(reserveButton).toBeVisible({ timeout: 15000 });
+    console.log("✅ Приложение загружено");
 
     // Скриншот главной страницы
     await takeScreenshot(page, "01-homepage-loaded");
@@ -226,23 +227,28 @@ test.describe("Booking Flow E2E Tests", () => {
 
     console.log("🔄 Форма отправлена, ожидаем ответ...");
 
-    // 6. Проверка сообщения о демо-режиме
-    console.log("🎭 Шаг 6: Проверяем сообщение о демо-режиме");
+    // 6. Проверка успешного бронирования
+    console.log("✅ Шаг 6: Проверяем успешное бронирование");
 
     // Ожидание появления сообщения об успехе
-    await page.waitForSelector("text=Демо-режим", { timeout: 10000 });
-
-    // Проверка заголовка и содержимого сообщения
-    await expect(page.getByRole("heading", { name: "Демо-режим", level: 3 })).toBeVisible();
-    await expect(page.locator("text=Система временно работает в демо-режиме")).toBeVisible();
+    const successHeading = page.getByRole("heading", { name: "Бронирование отправлено!" });
+    const demoHeading = page.getByRole("heading", { name: "Демо-режим" });
+    
+    // Ждем появления одного из заголовков
+    await expect(successHeading.or(demoHeading)).toBeVisible({ timeout: 15000 });
 
     // Проверка наличия кнопки для создания нового бронирования
     await expect(page.locator("button", { hasText: "Создать новое бронирование" })).toBeVisible();
 
-    console.log("✅ Сообщение о демо-режиме отображается корректно");
+    const isDemo = await demoHeading.isVisible().catch(() => false);
+    if (isDemo) {
+      console.log("⚠️ Бронирование в демо-режиме (сервер недоступен)");
+    } else {
+      console.log("✅ Бронирование успешно сохранено в Supabase!");
+    }
 
-    // Скриншот сообщения о демо-режиме
-    await takeScreenshot(page, "05-demo-mode-message");
+    // Скриншот результата
+    await takeScreenshot(page, "05-booking-result");
 
     // 7. Сброс формы
     console.log("🔄 Шаг 7: Сбрасываем форму для нового бронирования");

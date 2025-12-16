@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import type { Event } from "../types";
-import { defaultEvents } from "../data/defaults";
+import { siteApi } from "../api/supabaseApi";
 
 interface EventsState {
   events: Event[];
   editingEvent: Event | null;
   newEvent: Omit<Event, "id">;
+  isLoading: boolean;
+  isLoaded: boolean;
   setEvents: (events: Event[]) => void;
   setEditingEvent: (event: Event | null) => void;
   setNewEvent: (event: Omit<Event, "id">) => void;
@@ -13,6 +15,7 @@ interface EventsState {
   updateEvent: () => boolean;
   deleteEvent: (id: number) => void;
   resetNewEvent: () => void;
+  loadEvents: () => Promise<void>;
 }
 
 const defaultNewEvent: Omit<Event, "id"> = {
@@ -27,13 +30,31 @@ const defaultNewEvent: Omit<Event, "id"> = {
 };
 
 export const useEventsStore = create<EventsState>((set, get) => ({
-  events: defaultEvents,
+  events: [],
   editingEvent: null,
   newEvent: defaultNewEvent,
+  isLoading: false,
+  isLoaded: false,
 
   setEvents: (events) => set({ events }),
   setEditingEvent: (event) => set({ editingEvent: event }),
   setNewEvent: (event) => set({ newEvent: event }),
+
+  loadEvents: async () => {
+    if (get().isLoaded || get().isLoading) return;
+    
+    set({ isLoading: true });
+    try {
+      const events = await siteApi.getEvents();
+      if (events.length > 0) {
+        set({ events, isLoaded: true });
+      }
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   addEvent: () => {
     const { newEvent, events } = get();

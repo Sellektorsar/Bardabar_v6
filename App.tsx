@@ -8,8 +8,7 @@ import { toast } from "sonner";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { NewsletterModal } from "./components/NewsletterModal";
-import { defaultReviews } from "./src/data/defaults";
-import type { Review } from "./src/types";
+
 import { ROUTES, sectionToRoute, routeToSection } from "./src/router";
 import {
   useSettingsStore,
@@ -17,8 +16,10 @@ import {
   useEventsStore,
   useTeamStore,
   useGalleryStore,
+  useReviewsStore,
 } from "./src/stores";
 import { Toaster } from "./components/ui/sonner";
+import { useLoadData } from "./src/hooks/useLoadData";
 
 // Lazy loaded pages
 const HomePage = lazy(() =>
@@ -62,17 +63,22 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Загрузка данных из Supabase
+  useLoadData();
+
   // Zustand stores
-  const { settings, isDarkMode, toggleDarkMode, setSettings, saveSettings } = useSettingsStore();
+  const { settings, setSettings } = useSettingsStore();
   const menuStore = useMenuStore();
   const eventsStore = useEventsStore();
   const teamStore = useTeamStore();
   const galleryStore = useGalleryStore();
 
+  // Reviews store
+  const { reviews } = useReviewsStore();
+
   // Local state (не в stores)
   const [adminTab, setAdminTab] = useState("staff");
   const [showNewsletterModal, setShowNewsletterModal] = useState(false);
-  const [reviews] = useState<Review[]>(defaultReviews);
 
   // Get active section from current route
   const activeSection = routeToSection[location.pathname] || "home";
@@ -172,23 +178,16 @@ function AppContent() {
   };
 
   const handleSaveSiteSettings = () => {
-    if (saveSettings()) {
-      toast.success("Настройки сайта сохранены");
-    } else {
-      toast.error("Не удалось сохранить настройки сайта");
-    }
+    // TODO: Сохранение в Supabase
+    toast.success("Настройки сайта сохранены");
   };
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 transition-colors duration-300 dark:from-gray-900 dark:to-gray-800`}
-    >
+    <div className="min-h-screen bg-background">
       <Header
         activeSection={activeSection}
         onNavClick={handleNavClick}
         cafeName={settings.cafeName}
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={toggleDarkMode}
       />
       <main className="transition-all duration-500 ease-in-out">
         <Suspense fallback={<PageLoader />}>

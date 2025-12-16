@@ -28,18 +28,18 @@ interface HeroProps {
 
 export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
   return (
-    <section className="relative min-h-[90vh] overflow-hidden">
-      {/* Animated background blobs */}
-      <div className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] animate-float rounded-full bg-gradient-to-bl from-orange-200/40 to-transparent blur-3xl" />
-      <div className="absolute bottom-0 left-0 -z-10 h-[400px] w-[400px] animate-float rounded-full bg-gradient-to-tr from-red-200/40 to-transparent blur-3xl" style={{ animationDelay: "1.5s" }} />
-      <div className="absolute left-1/2 top-1/3 -z-10 h-[300px] w-[300px] animate-float rounded-full bg-gradient-to-r from-orange-300/20 to-red-300/20 blur-3xl" style={{ animationDelay: "3s" }} />
+    <section className="loft-texture relative min-h-[90vh] overflow-hidden bg-background">
+      {/* Warm ambient glow effects */}
+      <div className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] animate-float rounded-full bg-gradient-to-bl from-amber-500/20 to-transparent blur-3xl" />
+      <div className="absolute bottom-0 left-0 -z-10 h-[400px] w-[400px] animate-float rounded-full bg-gradient-to-tr from-red-600/15 to-transparent blur-3xl" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute left-1/2 top-1/3 -z-10 h-[300px] w-[300px] animate-float rounded-full bg-gradient-to-r from-amber-400/10 to-red-500/10 blur-3xl" style={{ animationDelay: "3s" }} />
 
       <div className="container mx-auto px-4 py-16 lg:py-24">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="space-y-8">
             {/* Badge */}
-            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border-2 border-orange-400 bg-white px-4 py-2 text-sm font-medium text-orange-600 shadow-md dark:border-orange-600 dark:bg-gray-900 dark:text-orange-400">
-              <Sparkles className="h-4 w-4 animate-pulse text-orange-500" />
+            <div className="animate-slide-up inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-secondary px-4 py-2 text-sm font-medium text-amber-400 shadow-lg shadow-amber-500/10">
+              <Sparkles className="h-4 w-4 animate-pulse text-amber-400" />
               <span>Лучшее место в городе</span>
             </div>
 
@@ -57,18 +57,18 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
 
             {/* Stats */}
             <div className="animate-slide-up flex flex-wrap gap-4 text-sm" style={{ animationDelay: "0.3s" }}>
-              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
-                <Star className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="font-semibold text-orange-600">4.8</span>
-                <span className="text-gray-600 dark:text-gray-300">рейтинг</span>
+              <div className="loft-card group flex items-center gap-2 rounded-full px-4 py-2 transition-all">
+                <Star className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
+                <span className="font-semibold text-amber-400">4.8</span>
+                <span className="text-foreground/70">рейтинг</span>
               </div>
-              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
-                <Clock className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="text-gray-600 dark:text-gray-300">09:00-23:00</span>
+              <div className="loft-card group flex items-center gap-2 rounded-full px-4 py-2 transition-all">
+                <Clock className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
+                <span className="text-foreground/70">09:00-23:00</span>
               </div>
-              <div className="group flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 shadow-sm transition-all hover:border-orange-400 hover:shadow-md dark:border-orange-800 dark:bg-gray-900">
-                <MapPin className="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110" />
-                <span className="text-gray-600 dark:text-gray-300">Центр города</span>
+              <div className="loft-card group flex items-center gap-2 rounded-full px-4 py-2 transition-all">
+                <MapPin className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
+                <span className="text-foreground/70">Центр города</span>
               </div>
             </div>
 
@@ -77,18 +77,17 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
               <Button
                 size="lg"
                 onClick={() => onNavigate("menu")}
-                className="glow-on-hover group relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-6 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-xl"
+                className="btn-loft group relative overflow-hidden rounded-xl px-8 py-6 text-lg font-semibold shadow-lg transition-all duration-300 hover:scale-105"
               >
                 <span className="relative z-10">Посмотреть меню</span>
-                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 transition-opacity group-hover:opacity-100" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => onNavigate("reservation")}
-                className="group rounded-xl border-2 border-orange-300 px-8 py-6 text-lg font-semibold text-orange-600 transition-all duration-300 hover:scale-105 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="btn-outline-loft group rounded-xl px-8 py-6 text-lg font-semibold transition-all duration-300 hover:scale-105"
               >
-                <span className="underline-animation">Забронировать столик</span>
+                <span>Забронировать столик</span>
               </Button>
             </div>
 
@@ -99,7 +98,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/30"
+                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-amber-500/10 hover:text-amber-400"
                   aria-label="Мы ВКонтакте"
                 >
                   <VKIcon className="h-5 w-5" />
@@ -107,7 +106,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-orange-100 hover:text-orange-600 dark:hover:bg-orange-900/30"
+                  className="rounded-full text-muted-foreground transition-all hover:scale-110 hover:bg-amber-500/10 hover:text-amber-400"
                   aria-label="Мы в Telegram"
                 >
                   <TelegramIcon className="h-5 w-5" />
@@ -118,13 +117,15 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
 
           {/* Hero Image */}
           <div className="relative animate-scale-in">
-            {/* Main image with 3D effect */}
-            <div className="card-3d relative z-10 overflow-hidden rounded-3xl shadow-2xl">
+            {/* Main image with warm glow effect */}
+            <div className="warm-glow relative z-10 overflow-hidden rounded-3xl">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                src="https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/interior-1.jpg"
                 alt={`Интерьер кафе ${settings.cafeName}`}
                 className="h-[400px] w-full object-cover lg:h-[500px]"
               />
+              {/* Warm overlay */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-amber-900/30 via-transparent to-transparent" />
             </div>
           </div>
         </div>
@@ -134,7 +135,7 @@ export function Hero({ settings, onNavigate, onShowNewsletter }: HeroProps) {
       <div className="absolute bottom-8 right-8 z-20">
         <Button
           onClick={onShowNewsletter}
-          className="animate-pulse-glow rounded-full bg-orange-600 p-4 text-white shadow-lg transition-transform hover:scale-110 hover:bg-orange-700"
+          className="animate-glow-pulse rounded-full bg-gradient-to-r from-amber-500 to-red-600 p-4 text-white shadow-lg transition-transform hover:scale-110"
           aria-label="Подписаться на новости"
         >
           <Mail className="h-5 w-5" />

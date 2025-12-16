@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
@@ -37,6 +38,17 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        // Брендовые цвета "Тёплый премиум"
+        brand: {
+          gold: "#d4af37",
+          "gold-light": "#e6c555",
+          burgundy: "#8b0000",
+          "burgundy-light": "#a52a2a",
+          black: "#0f0f0f",
+          cream: "#f5f5f5",
+          dark: "#0f0f0f",
+          "dark-light": "#1a1a1a",
+        },
         chart: {
           1: "var(--chart-1)",
           2: "var(--chart-2)",

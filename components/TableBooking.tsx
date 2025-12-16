@@ -110,10 +110,10 @@ export function TableBooking({ onClose }: TableBookingProps) {
   };
 
   return (
-    <Card className="mx-auto w-full max-w-2xl">
+    <Card className="loft-card mx-auto w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl">
-          <Users className="h-6 w-6 text-orange-600" />
+          <Users className="h-6 w-6 text-amber-400" />
           Бронирование столика
         </CardTitle>
         <p className="text-muted-foreground">
@@ -272,12 +272,12 @@ export function TableBooking({ onClose }: TableBookingProps) {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+              className="btn-loft flex-1"
             >
               {isSubmitting ? "Создание бронирования..." : "Забронировать столик"}
             </Button>
             {onClose && (
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className="btn-outline-loft">
                 Отмена
               </Button>
             )}

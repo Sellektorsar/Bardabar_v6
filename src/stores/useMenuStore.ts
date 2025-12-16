@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import type { MenuItem } from "../types";
-import { defaultMenuItems } from "../data/defaults";
+import { siteApi } from "../api/supabaseApi";
 
 interface MenuState {
   items: MenuItem[];
   editingItem: MenuItem | null;
   newItem: Omit<MenuItem, "id">;
+  isLoading: boolean;
+  isLoaded: boolean;
   setItems: (items: MenuItem[]) => void;
   setEditingItem: (item: MenuItem | null) => void;
   setNewItem: (item: Omit<MenuItem, "id">) => void;
@@ -13,6 +15,7 @@ interface MenuState {
   updateItem: () => boolean;
   deleteItem: (id: number) => void;
   resetNewItem: () => void;
+  loadItems: () => Promise<void>;
 }
 
 const defaultNewItem: Omit<MenuItem, "id"> = {
@@ -29,13 +32,31 @@ const defaultNewItem: Omit<MenuItem, "id"> = {
 };
 
 export const useMenuStore = create<MenuState>((set, get) => ({
-  items: defaultMenuItems,
+  items: [],
   editingItem: null,
   newItem: defaultNewItem,
+  isLoading: false,
+  isLoaded: false,
 
   setItems: (items) => set({ items }),
   setEditingItem: (item) => set({ editingItem: item }),
   setNewItem: (item) => set({ newItem: item }),
+
+  loadItems: async () => {
+    if (get().isLoaded || get().isLoading) return;
+    
+    set({ isLoading: true });
+    try {
+      const items = await siteApi.getMenuItems();
+      if (items.length > 0) {
+        set({ items, isLoaded: true });
+      }
+    } catch (error) {
+      console.error("Failed to load menu:", error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   addItem: () => {
     const { newItem, items } = get();

@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { formatPhoneNumber, isValidPhone, isValidEmail } from "../src/utils/formatters";
-import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { formatPhoneNumber, isValidPhone } from "../src/utils/formatters";
+import { supabase } from "../src/lib/supabase";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -33,67 +33,6 @@ interface EventBookingProps {
   event: Event;
   trigger?: React.ReactNode;
 }
-
-// Вспомогательные функции: сохранение/обновление демо-бронирований мероприятий
-const saveDemoEventBooking = (payload: {
-  name: string;
-  phone: string;
-  email: string;
-  tickets: string;
-  paymentMethod: string;
-  event: Event;
-  totalAmount: number;
-}) => {
-  try {
-    const existing = JSON.parse(localStorage.getItem("demo_bookings") || "[]");
-    const id = `demo-event-${Date.now()}`;
-    const ticketsNum = parseInt(payload.tickets || "1", 10) || 1;
-    const paymentStatus =
-      payload.event.price > 0
-        ? payload.paymentMethod === "card"
-          ? "requires_payment"
-          : "pending"
-        : "paid";
-
-    const demoItem = {
-      id,
-      type: "event" as const,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      name: payload.name,
-      phone: payload.phone,
-      email: payload.email,
-      eventTitle: payload.event.title,
-      tickets: ticketsNum,
-      totalAmount: payload.totalAmount,
-      paymentStatus,
-      paymentMethod: payload.paymentMethod,
-    };
-
-    localStorage.setItem("demo_bookings", JSON.stringify([demoItem, ...existing]));
-    return id;
-  } catch {
-    return null;
-  }
-};
-
-interface DemoBooking {
-  id: string;
-  paymentStatus?: string;
-  status?: string;
-}
-
-const markDemoEventPaid = (id: string) => {
-  try {
-    const existing: DemoBooking[] = JSON.parse(localStorage.getItem("demo_bookings") || "[]");
-    const updated = existing.map((b) =>
-      b.id === id ? { ...b, paymentStatus: "paid", status: "confirmed" } : b,
-    );
-    localStorage.setItem("demo_bookings", JSON.stringify(updated));
-  } catch (e) {
-    console.error("Не удалось пометить демо-событие как оплачено:", e);
-  }
-};
 
 export function EventBooking({ event, trigger }: EventBookingProps) {
   const [formData, setFormData] = useState({
@@ -117,71 +56,40 @@ export function EventBooking({ event, trigger }: EventBookingProps) {
     setError("");
 
     try {
-      const response = await fetch(
-        `https://${projectId}.functions.supabase.co/server/make-server-c85ae302/event-bookings`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-          body: JSON.stringify({
-            eventId: event.id,
-            ...formData,
-          }),
-        },
-      );
+      const ticketsNum = parseInt(formData.tickets || "1", 10) || 1;
+      const paymentStatus = event.price > 0 
+        ? (formData.paymentMethod === "card" ? "requires_payment" : "pending")
+        : "paid";
 
-      // Graceful fallback: Supabase project paused
-      if (response.status === 540) {
-        const demoId =
-          saveDemoEventBooking({
-            name: formData.name,
-            phone: formData.phone,
-            email: formData.email,
-            tickets: formData.tickets,
-            paymentMethod: formData.paymentMethod,
-            event,
-            totalAmount,
-          }) || `demo-event-${Date.now()}`;
-        setBookingId(demoId);
-        setSubmitted(true);
-        console.log("Проект приостановлен (540). Включен демо-режим для бронирования мероприятия");
-        return;
+      const { data, error: insertError } = await supabase
+        .from("bookings")
+        .insert({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || null,
+          type: "event",
+          status: "pending",
+          event_id: parseInt(event.id, 10),
+          event_title: event.title,
+          tickets: ticketsNum,
+          total_amount: totalAmount,
+          payment_status: paymentStatus,
+          payment_method: formData.paymentMethod,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(insertError.message);
       }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Ошибка при создании бронирования");
-      }
-
-      setBookingId(data.booking.id);
-
+      setBookingId(data.id);
       setSubmitted(true);
-
-      console.log("Бронирование создано:", data.booking);
+      console.log("Бронирование мероприятия создано:", data);
     } catch (error) {
       console.error("Ошибка бронирования:", error);
       const msg = error instanceof Error ? error.message : "Произошла ошибка";
-      // Graceful fallback: сетевые/CORS ошибки
-      if (/Network|CORS|Failed to fetch/i.test(msg)) {
-        const demoId =
-          saveDemoEventBooking({
-            name: formData.name,
-            phone: formData.phone,
-            email: formData.email,
-            tickets: formData.tickets,
-            paymentMethod: formData.paymentMethod,
-            event,
-            totalAmount,
-          }) || `demo-event-${Date.now()}`;
-        setBookingId(demoId);
-        setSubmitted(true);
-        console.log("Сетевая/CORS ошибка. Включен демо-режим для бронирования мероприятия");
-      } else {
-        setError(msg);
-      }
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }

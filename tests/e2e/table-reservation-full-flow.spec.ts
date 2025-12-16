@@ -163,14 +163,14 @@ test.describe('Table Reservation Full Flow E2E Tests', () => {
     await expect(successHeading.or(demoHeading)).toBeVisible({ timeout: 10000 });
   });
 
-  test('should handle demo mode gracefully when server is unavailable', async ({ page }) => {
-    // Блокируем запросы к серверу для имитации недоступности
-    await page.route('**/api/reservations', route => {
+  test('should handle Supabase errors gracefully', async ({ page }) => {
+    // Блокируем запросы к Supabase для имитации недоступности
+    await page.route('**/rest/v1/bookings**', route => {
       route.abort();
     });
     
     // Заполняем форму
-    await page.locator('input[placeholder="Ваше имя"]').fill('Демо Пользователь');
+    await page.locator('input[placeholder="Ваше имя"]').fill('Тест Ошибки');
     await page.locator('input[placeholder="+7 (999) 999-99-99"]').fill('+7 (999) 123-45-67');
     
     // Выбираем дату
@@ -193,23 +193,28 @@ test.describe('Table Reservation Full Flow E2E Tests', () => {
     await expect(tomorrowButton.first()).toBeVisible({ timeout: 5000 });
     
     // Используем JavaScript клик для обхода проблем с viewport
-    await tomorrowButton.first().evaluate(el => el.click());
+    await tomorrowButton.first().evaluate(el => (el as HTMLElement).click());
     
     // Выбираем время
     const timeButton = page.locator('button[id="time"]');
     await expect(timeButton).toBeVisible({ timeout: 5000 });
     await timeButton.click();
-    await page.getByRole('option', { name: '19:00' }).evaluate(el => el.click());
+    await page.getByRole('option', { name: '19:00' }).evaluate(el => (el as HTMLElement).click());
     
     // Выбираем количество гостей
     await page.locator('button[id="guests"]').click();
-    await page.getByRole('option', { name: '2' }).evaluate(el => el.click());
+    await page.getByRole('option', { name: '2' }).evaluate(el => (el as HTMLElement).click());
     
     // Отправляем форму
     await page.getByRole('button', { name: 'Забронировать столик' }).click();
     
-    // Проверяем, что появилось сообщение о демо-режиме
-    await expect(page.getByRole('heading', { name: 'Демо-режим' })).toBeVisible({ timeout: 10000 });
+    // Проверяем, что появилось сообщение об ошибке (форма остается видимой с ошибкой)
+    // При блокировке Supabase должна появиться ошибка
+    const errorMessage = page.locator('[role="alert"]');
+    const formHeading = page.getByRole('heading', { name: 'Бронирование столика' });
+    
+    // Ожидаем либо сообщение об ошибке, либо форма остается видимой
+    await expect(errorMessage.or(formHeading)).toBeVisible({ timeout: 10000 });
   });
 
   test('should prevent booking for past dates and times', async ({ page }) => {

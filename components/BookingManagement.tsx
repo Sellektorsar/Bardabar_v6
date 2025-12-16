@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AlertTriangle,
   Calendar,
   CreditCard,
   Loader2,
@@ -13,8 +12,7 @@ import {
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { reservationsApi, ProjectPausedError, isNetworkError } from "../src/api/client";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { supabase } from "../src/lib/supabase";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -41,52 +39,10 @@ interface Booking {
   paymentMethod?: string;
 }
 
-// Демо-данные и локальный ридер вынесены на модульный уровень для стабильных ссылок
-const DEMO_BOOKINGS: Booking[] = [
-  {
-    id: "demo-table-1",
-    name: "Иван Петров",
-    phone: "+7 900 123-45-67",
-    email: "ivan@example.com",
-    status: "pending",
-    type: "table",
-    createdAt: new Date().toISOString(),
-    date: new Date().toLocaleDateString("ru-RU"),
-    time: "19:00",
-    guests: 4,
-    specialRequests: "Окно, детский стул",
-  },
-  {
-    id: "demo-event-1",
-    name: "Мария Смирнова",
-    phone: "+7 911 555-22-11",
-    email: "maria@example.com",
-    status: "confirmed",
-    type: "event",
-    createdAt: new Date().toISOString(),
-    eventTitle: "Джазовый вечер",
-    tickets: 2,
-    totalAmount: 3000,
-    paymentStatus: "paid",
-    paymentMethod: "card",
-  },
-];
-
-const readDemoBookings = (): Booking[] => {
-  try {
-    const raw = localStorage.getItem("demo_bookings");
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-};
-
 export function BookingManagement() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string[]>([]);
-  const [isProjectPaused, setIsProjectPaused] = useState(false);
   const [statusFilterTables, setStatusFilterTables] = useState<
     "all" | "pending" | "confirmed" | "completed" | "cancelled"
   >("all");
@@ -97,43 +53,43 @@ export function BookingManagement() {
     "all" | "paid" | "pending" | "requires_payment"
   >("all");
 
-  // Демо-данные и ридер вынесены на уровень модуля выше
-
-  const updateDemoBookingStatus = (bookingId: string, newStatus: string) => {
-    try {
-      const arr = readDemoBookings();
-      const updated = arr.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b));
-      localStorage.setItem("demo_bookings", JSON.stringify(updated));
-    } catch (e) {
-      console.error("Не удалось обновить локальные демо-бронирования:", e);
-    }
-  };
-
   const fetchBookings = React.useCallback(async () => {
     try {
-      // Возможность принудительно включить демо-режим через env для локальной разработки
-      if (import.meta.env?.VITE_BOOKINGS_DEMO === "1") {
-        setIsProjectPaused(true);
-        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Ошибка при получении бронирований:", error);
+        setBookings([]);
         return;
       }
 
-      const data = await reservationsApi.getAll();
-      setBookings(Array.isArray(data) ? data : []);
+      // Преобразуем данные из snake_case в camelCase для совместимости с UI
+      const mappedBookings: Booking[] = (data || []).map((item) => ({
+        id: item.id,
+        name: item.name,
+        phone: item.phone,
+        email: item.email || "",
+        status: item.status,
+        type: item.type,
+        createdAt: item.created_at,
+        date: item.date,
+        time: item.time,
+        guests: item.guests,
+        specialRequests: item.special_requests,
+        eventTitle: item.event_title,
+        tickets: item.tickets,
+        totalAmount: item.total_amount,
+        paymentStatus: item.payment_status,
+        paymentMethod: item.payment_method,
+      }));
+
+      setBookings(mappedBookings);
     } catch (error) {
       console.error("Ошибка при получении бронирований:", error);
-
-      // Фолбэк при паузе проекта или сетевых ошибках
-      if (
-        error instanceof ProjectPausedError ||
-        (error instanceof Error && isNetworkError(error.message))
-      ) {
-        setIsProjectPaused(true);
-        setBookings([...readDemoBookings(), ...DEMO_BOOKINGS]);
-      } else {
-        setIsProjectPaused(true);
-        setBookings(DEMO_BOOKINGS);
-      }
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -147,27 +103,23 @@ export function BookingManagement() {
     setUpdatingStatus([...updatingStatus, bookingId]);
 
     try {
-      await reservationsApi.updateStatus(bookingId, newStatus);
-      setBookings(
-        bookings.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: newStatus } : booking,
-        ),
-      );
-      updateDemoBookingStatus(bookingId, newStatus);
-    } catch (error) {
-      console.error("Ошибка при обновлении статуса:", error);
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq("id", bookingId);
 
-      // Фолбэк — обновляем локально
-      if (error instanceof ProjectPausedError) {
-        setIsProjectPaused(true);
+      if (error) {
+        console.error("Ошибка при обновлении статуса:", error);
       }
 
+      // Обновляем локальное состояние
       setBookings(
         bookings.map((booking) =>
           booking.id === bookingId ? { ...booking, status: newStatus } : booking,
         ),
       );
-      updateDemoBookingStatus(bookingId, newStatus);
+    } catch (error) {
+      console.error("Ошибка при обновлении статуса:", error);
     } finally {
       setUpdatingStatus(updatingStatus.filter((id) => id !== bookingId));
     }
@@ -290,17 +242,6 @@ export function BookingManagement() {
           Обновить
         </Button>
       </div>
-
-      {isProjectPaused && (
-        <Alert className="border-yellow-300 bg-yellow-50 text-yellow-900">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Демо-режим</AlertTitle>
-          <AlertDescription>
-            Сервер бронирований временно недоступен (Project Paused). Показаны демо-данные.
-            Изменения статусов применяются только локально.
-          </AlertDescription>
-        </Alert>
-      )}
 
       <Tabs defaultValue="tables" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

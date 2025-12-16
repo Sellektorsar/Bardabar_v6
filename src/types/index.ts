@@ -5,6 +5,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: string;
+  weight?: string;
   image: string;
   category: string;
   isSpecial: boolean;

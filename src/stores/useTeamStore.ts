@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { TeamMember } from "../types";
-import { defaultTeamMembers } from "../data/defaults";
 
 interface TeamState {
   members: TeamMember[];
@@ -24,7 +23,7 @@ const defaultNewMember: Omit<TeamMember, "id"> = {
 };
 
 export const useTeamStore = create<TeamState>((set, get) => ({
-  members: defaultTeamMembers,
+  members: [],
   editingMember: null,
   newMember: defaultNewMember,
 

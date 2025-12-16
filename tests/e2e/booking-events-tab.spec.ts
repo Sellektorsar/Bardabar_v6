@@ -62,8 +62,8 @@ test.describe("Booking Events Tab E2E Tests", () => {
     // 1. Переход на вкладку "Бронирования" в админ-панели
     console.log("📋 Шаг 1: Переходим на вкладку Бронирования");
 
-    const bookingsTab = page.getByRole("tab", { name: /бронирования/i });
-    await expect(bookingsTab).toBeVisible();
+    const bookingsTab = page.getByRole("tab", { name: /бронирования|брони/i });
+    await expect(bookingsTab).toBeVisible({ timeout: 10000 });
     await bookingsTab.click();
 
     // Ожидание загрузки компонента BookingManagement

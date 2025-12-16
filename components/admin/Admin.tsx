@@ -112,36 +112,41 @@ export function Admin({
       </div>
 
       <Tabs value={adminTab} onValueChange={onAdminTabChange} className="w-full">
-        <TabsList className="relative z-10 mb-8 grid w-full grid-cols-7">
-          <TabsTrigger value="staff" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Персонал
-          </TabsTrigger>
-          <TabsTrigger value="menu" className="flex items-center gap-2">
-            <Utensils className="h-4 w-4" />
-            Меню
-          </TabsTrigger>
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
-            Галерея
-          </TabsTrigger>
-          <TabsTrigger value="events" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            События
-          </TabsTrigger>
-          <TabsTrigger value="bookings" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Бронирования
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Уведомления
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Настройки
-          </TabsTrigger>
-        </TabsList>
+        <div className="relative z-10 mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <TabsList className="inline-flex w-max min-w-full gap-1 md:grid md:w-full md:grid-cols-7">
+            <TabsTrigger value="staff" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Users className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Персонал</span>
+              <span className="sm:hidden">Персонал</span>
+            </TabsTrigger>
+            <TabsTrigger value="menu" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Utensils className="h-4 w-4 flex-shrink-0" />
+              <span>Меню</span>
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <ImageIcon className="h-4 w-4 flex-shrink-0" />
+              <span>Галерея</span>
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span>События</span>
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span>Брони</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Bell className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden md:inline">Уведомления</span>
+              <span className="md:hidden">Увед.</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-xs md:text-sm md:gap-2 md:px-4">
+              <Settings className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden md:inline">Настройки</span>
+              <span className="md:hidden">Настр.</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="staff" className="space-y-6">
           <AdminStaffTab

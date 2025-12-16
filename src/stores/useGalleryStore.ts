@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import type { GalleryImage } from "../types";
-import { defaultGalleryImages } from "../data/defaults";
+import { siteApi } from "../api/supabaseApi";
 
 interface GalleryState {
   images: GalleryImage[];
   editingImage: GalleryImage | null;
   newImage: Omit<GalleryImage, "id">;
+  isLoading: boolean;
+  isLoaded: boolean;
   setImages: (images: GalleryImage[]) => void;
   setEditingImage: (image: GalleryImage | null) => void;
   setNewImage: (image: Omit<GalleryImage, "id">) => void;
@@ -13,6 +15,7 @@ interface GalleryState {
   updateImage: () => boolean;
   deleteImage: (id: number) => void;
   resetNewImage: () => void;
+  loadImages: () => Promise<void>;
 }
 
 const defaultNewImage: Omit<GalleryImage, "id"> = {
@@ -22,13 +25,31 @@ const defaultNewImage: Omit<GalleryImage, "id"> = {
 };
 
 export const useGalleryStore = create<GalleryState>((set, get) => ({
-  images: defaultGalleryImages,
+  images: [],
   editingImage: null,
   newImage: defaultNewImage,
+  isLoading: false,
+  isLoaded: false,
 
   setImages: (images) => set({ images }),
   setEditingImage: (image) => set({ editingImage: image }),
   setNewImage: (image) => set({ newImage: image }),
+
+  loadImages: async () => {
+    if (get().isLoaded || get().isLoading) return;
+    
+    set({ isLoading: true });
+    try {
+      const images = await siteApi.getGalleryImages();
+      if (images.length > 0) {
+        set({ images, isLoaded: true });
+      }
+    } catch (error) {
+      console.error("Failed to load gallery:", error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   addImage: () => {
     const { newImage, images } = get();

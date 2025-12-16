@@ -72,7 +72,7 @@ export function About({ cafeName, teamMembers }: AboutProps) {
         </div>
         <div className="order-1 lg:order-2">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            src="https://epzjzmvefnlchacvegtk.supabase.co/storage/v1/object/public/images/gallery/interior-2.jpg"
             alt="Интерьер кафе Бар-да-бар"
             className="h-96 w-full rounded-2xl object-cover shadow-lg"
           />
@@ -89,11 +89,11 @@ export function About({ cafeName, teamMembers }: AboutProps) {
               return (
                 <Card
                   key={index}
-                  className="hover-lift group border-orange-100 text-center"
+                  className="loft-card group text-center"
                 >
                   <CardContent className="p-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-red-100 transition-transform group-hover:scale-110 dark:from-orange-900/30 dark:to-red-900/30">
-                      <Icon className="h-8 w-8 text-orange-600 transition-transform group-hover:rotate-12" />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-500/20 to-red-600/20 transition-transform group-hover:scale-110">
+                      <Icon className="h-8 w-8 text-amber-400 transition-transform group-hover:rotate-12" />
                     </div>
                     <h4 className="mb-2 font-bold text-foreground">{achievement.title}</h4>
                     <p className="text-sm text-muted-foreground">{achievement.description}</p>
@@ -113,7 +113,7 @@ export function About({ cafeName, teamMembers }: AboutProps) {
             {teamMembers.map((member, index) => (
               <Card
                 key={member.id}
-                className="hover-lift group border-orange-100"
+                className="loft-card group"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
               <CardHeader className="p-0">
@@ -124,7 +124,7 @@ export function About({ cafeName, teamMembers }: AboutProps) {
                     className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute right-4 top-4">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge className="bg-amber-500/90 text-xs text-white">
                       {member.speciality}
                     </Badge>
                   </div>
@@ -132,7 +132,7 @@ export function About({ cafeName, teamMembers }: AboutProps) {
               </CardHeader>
               <CardContent className="p-6">
                 <CardTitle className="mb-1 text-lg text-foreground">{member.name}</CardTitle>
-                <Badge variant="secondary" className="mb-3">
+                <Badge className="mb-3 bg-secondary text-amber-400">
                   {member.position}
                 </Badge>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -147,7 +147,7 @@ export function About({ cafeName, teamMembers }: AboutProps) {
 
       {/* Философия */}
       <ScrollReveal delay={400}>
-        <div className="mt-16 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-50 to-red-50 p-8 dark:from-orange-900/20 dark:to-red-900/20">
+        <div className="loft-card mt-16 overflow-hidden rounded-2xl p-8">
           <div className="text-center">
             <h3 className="mb-4 text-2xl font-bold text-foreground">Наша философия</h3>
             <p className="mx-auto max-w-2xl text-muted-foreground">
@@ -158,19 +158,19 @@ export function About({ cafeName, teamMembers }: AboutProps) {
             {/* Animated stats */}
             <div className="mt-8 flex flex-wrap justify-center gap-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">
+                <div className="text-3xl font-bold text-amber-400">
                   <AnimatedCounter end={2018} duration={1500} />
                 </div>
                 <div className="text-sm text-muted-foreground">Год основания</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">
+                <div className="text-3xl font-bold text-amber-400">
                   <AnimatedCounter end={50} suffix="+" />
                 </div>
                 <div className="text-sm text-muted-foreground">Лет опыта команды</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">
+                <div className="text-3xl font-bold text-amber-400">
                   <AnimatedCounter end={2000} suffix="+" />
                 </div>
                 <div className="text-sm text-muted-foreground">Гостей в месяц</div>
